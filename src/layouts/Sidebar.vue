@@ -32,7 +32,10 @@
         <button class="flex-1 px-3 py-2 text-xs bg-gray-700 hover:bg-gray-600 rounded transition">
           Settings
         </button>
-        <button class="flex-1 px-3 py-2 text-xs bg-red-600 hover:bg-red-700 rounded transition">
+        <button
+          @click="handleLogout"
+          class="flex-1 px-3 py-2 text-xs bg-red-600 hover:bg-red-700 rounded transition"
+        >
           Logout
         </button>
       </div>
@@ -42,9 +45,18 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { authStore } from '../modules/auth/store/authStore';
 
 const route = useRoute();
+const router = useRouter();
+
+const handleLogout = () => {
+  // clear store and local storage then navigate back to login
+  authStore.logout();
+  localStorage.clear();
+  router.push('/login');
+};
 
 const menu = [
   // { path: '/dashboard', label: 'Dashboard', name: 'Dashboard' },

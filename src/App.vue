@@ -1,7 +1,18 @@
 <script setup lang="ts">
-import DefaultLayout from './layouts/DefaultLayout.vue';
+import { useRoute } from "vue-router"
+import DefaultLayout from "./layouts/DefaultLayout.vue"
+
+const route = useRoute()
 </script>
 
 <template>
-  <DefaultLayout />
+
+  <!-- LOGIN PAGE -->
+  <router-view v-if="route.path === '/login'" />
+
+  <!-- NORMAL PAGES -->
+  <DefaultLayout v-else>
+    <router-view />
+  </DefaultLayout>
+
 </template>
