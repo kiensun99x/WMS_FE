@@ -1,7 +1,8 @@
 <template>
-  <header class="h-16 bg-white flex items-center justify-between px-6 shadow">
-    <h1 class="text-xl font-semibold">{{ title }}</h1>
-    <div class="flex items-center space-x-4">
+  <header v-if="title" class="bg-white flex flex-col p-6 justify-center shadow" >
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">{{ title }}</h1>
+      <p class="text-md text-gray-500 mt-1">{{ subtitle }}</p>
     </div>
   </header>
 </template>
@@ -12,4 +13,5 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const title = computed(() => route.meta.title || '');
+const subtitle = computed(() => route.meta.subtitle || '');
 </script>
