@@ -97,9 +97,10 @@ defineProps<{
 const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
     NEW: 'Mới',
-    PENDING: 'Lưu kho',
-    SUCCESS: 'Thành công',
-    FAILED: 'Thất bại',
+    STORED: 'Lưu kho',
+    DELIVERED: 'Đã giao',
+    FAILED: 'Giao thất bại',
+    RETURNED: 'Trả hàng'
   };
   return labels[status] || status;
 };
@@ -107,9 +108,10 @@ const getStatusLabel = (status: string) => {
 const getStatusClass = (status: string) => {
   const classes: Record<string, string> = {
     NEW: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800',
-    PENDING: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800',
-    SUCCESS: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800',
+    STORED: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800',
+    DELIVERED: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800',
     FAILED: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800',
+    RETURNED: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800',
   };
   return classes[status] || '';
 };
