@@ -5,7 +5,7 @@ export interface Order {
   id: number
   code: string
   createdAt: string
-  status: 'NEW' | 'PENDING' | 'SUCCESS' | 'FAILED'
+  status: 'NEW' | 'STORED' | 'DELIVERED' | 'FAILED' | 'RETURNED'
   statusCode: number
   failedDeliveryCount: number
   supplierName: string
@@ -31,20 +31,27 @@ export interface OrderPageResponse {
   }
 }
 
+export interface SearchOrderRequest {
+  orderCode?: string
+  supplierPhone?: string
+  receiverPhone?: string
+  statusCode?: number
+  warehouseCode?: string
+}
 /**
  * Fetch orders from API with pagination
  * @param page - Page number (0-indexed)
  * @param size - Items per page
  * @returns ApiResponse with orders list and pagination info
  */
-export const fetchOrders = (page: number = 0, size: number = 10) => {
-  return http.get<ApiResponse<OrderPageResponse>>('/orders/', {
-    params: {
-      page,
-      size
-    }
-  })
-}
+// export const fetchOrders = (page: number = 0, size: number = 10) => {
+//   return http.get<ApiResponse<OrderPageResponse>>('/orders/', {
+//     params: {
+//       page,
+//       size
+//     }
+//   })
+// }
 
 /**
  * Get single order by ID
@@ -58,13 +65,8 @@ export const getOrderById = (id: number) => {
  * Search orders with filters
  * @param filters - Search filters
  */
-export const searchOrders = (filters: {
-  code?: string
-  status?: string
-  supplierPhone?: string
-  receiverPhone?: string
-}, page: number = 0, size: number = 10) => {
-  return http.get<ApiResponse<OrderPageResponse>>('/orders/search', {
+export const fetchOrders = (filters: SearchOrderRequest, page: number = 0, size: number = 10) => {
+  return http.get<ApiResponse<OrderPageResponse>>('/orders/', {
     params: {
       ...filters,
       page,

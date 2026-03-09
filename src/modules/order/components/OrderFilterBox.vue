@@ -8,7 +8,7 @@
           <input
             v-model="localFilters.orderCode"
             type="text"
-            placeholder="VD: #INB-2023..."
+            placeholder="VD: DH-260302-00001"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -46,14 +46,15 @@
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái đơn hàng</label>
         <select
-          v-model="localFilters.status"
+          v-model="localFilters.statusCode"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          <option value="all">Tất cả trạng thái</option>
-          <option value="new">Mới</option>
-          <option value="pending">Lưu kho</option>
-          <option value="success">Thành công</option>
-          <option value="failed">Thất bại</option>
+          <option :value="undefined">Tất cả trạng thái</option>
+          <option :value=0>Mới</option>
+          <option :value=1>Lưu kho</option>
+          <option :value=2>Đã giao</option>
+          <option :value=3>Giao thất bại</option>
+          <option :value=4>Hoàn hàng</option>
         </select>
       </div>
 
@@ -61,14 +62,14 @@
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Mã kho hàng</label>
         <select
-          v-model="localFilters.warehouse"
+          v-model="localFilters.warehouseCode"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          <option value="all">Tất cả kho</option>
+          <option value="">Tất cả kho</option>
           <option value="K-TTT">Kho Tôn Thất Thuyết</option>
           <option value="K-SD">Kho Sơn Đồng</option>
           <option value="K-TD">Kho Trương Định</option>
-          <option value="K-LD">Kho La Thành</option>
+          <option value="K-LT">Kho La Thành</option>
         </select>
       </div>
     </div>
@@ -95,26 +96,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-
-interface FilterState {
-  orderCode: string;
-  supplierPhone: string;
-  receiverPhone: string;
-  status: string;
-  warehouse: string;
-}
+import type { SearchOrderRequest } from '../services/orderService';
 
 const emit = defineEmits<{
-  search: [filters: FilterState];
+  search: [filters: SearchOrderRequest];
   reset: [];
 }>();
 
-const localFilters = ref<FilterState>({
+const localFilters = ref<SearchOrderRequest>({
   orderCode: '',
   supplierPhone: '',
   receiverPhone: '',
-  status: 'all',
-  warehouse: 'all',
+  statusCode: undefined,
+  warehouseCode: '',
 });
 
 const applyFilters = () => {
@@ -126,8 +120,8 @@ const resetFilters = () => {
     orderCode: '',
     supplierPhone: '',
     receiverPhone: '',
-    status: 'all',
-    warehouse: 'all',
+    statusCode: undefined,
+    warehouseCode: '',
   };
   emit('reset');
 };

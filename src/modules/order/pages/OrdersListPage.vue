@@ -29,7 +29,7 @@ import { ref, computed, onMounted } from 'vue';
 import OrderFilterBox from '../components/OrderFilterBox.vue';
 import OrderTable from '../components/OrderTable.vue';
 import OrderPagination from '../components/OrderPagination.vue';
-import { fetchOrders, type Order, type OrderPageResponse } from '../services/orderService';
+import { fetchOrders, type Order, type SearchOrderRequest } from '../services/orderService';
 
 
 // State
@@ -44,49 +44,15 @@ const isLoading = ref(false)
 const error = ref<string | null>(null)
 
 // Filter state
-const searchFilters = ref({
+const searchFilters = ref<SearchOrderRequest>({
   orderCode: '',
   supplierPhone: '',
   receiverPhone: '',
-  status: 'all',
-  warehouse: 'all',
+  statusCode: undefined,
+  warehouseCode: '',
 });
 
-// const itemsPerPage = 10;
 const currentPage = ref(1);
-
-// Computed properties
-// const filteredOrders = computed(() => {
-//   return orders.value.filter((order) => {
-//     let matches = true;
-
-//     if (searchFilters.value.orderCode) {
-//       matches = matches && order.code.includes(searchFilters.value.orderCode);
-//     }
-
-//     if (searchFilters.value.supplierPhone) {
-//       matches = matches && order.supplierPhone.includes(searchFilters.value.supplierPhone);
-//     }
-
-//     if (searchFilters.value.receiverPhone) {
-//       matches = matches && order.receiverPhone.includes(searchFilters.value.receiverPhone);
-//     }
-
-//     if (searchFilters.value.status !== 'all') {
-//       matches = matches && order.status === searchFilters.value.status;
-//     }
-
-//     return matches;
-//   });
-// });
-
-// const totalPages = computed(() => Math.ceil(pageInfo.value.totalElements / itemsPerPage));
-
-// const currentOrders = computed(() => {
-//   const start = (currentPage.value - 1) * itemsPerPage;
-//   const end = start + itemsPerPage;
-//   return filteredOrders.value.slice(start, end);
-// });
 
 const startItem = computed(() => {
   return pageInfo.value.totalElements === 0 ? 0 : (pageInfo.value.number) * pageInfo.value.size + 1;
@@ -102,7 +68,7 @@ const loadOrders = async (page: number = 0) => {
   error.value = null
   
   try {
-    const response = await fetchOrders(page, 10)
+    const response = await fetchOrders(searchFilters.value, page, 10)
     const data = response.data
     
     if (data.result) {
@@ -118,9 +84,9 @@ const loadOrders = async (page: number = 0) => {
   }
 }
 
-const handleSearch = (filters: typeof searchFilters.value) => {
+const handleSearch = (filters: SearchOrderRequest) => {
   searchFilters.value = filters;
-  currentPage.value = 1;
+  loadOrders(0); // Reset to first page on new search
 };
 
 const handleReset = () => {
@@ -128,10 +94,10 @@ const handleReset = () => {
     orderCode: '',
     supplierPhone: '',
     receiverPhone: '',
-    status: 'all',
-    warehouse: 'all',
+    statusCode: undefined,
+    warehouseCode: '',
   };
-  currentPage.value = 1;
+  loadOrders(0);
 };
 
 const handlePageChange = (page: number) => {

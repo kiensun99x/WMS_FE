@@ -70,25 +70,7 @@
 </template>
 
 <script setup lang="ts">
-interface Order {
-  id: number;
-  code: string;
-  createdAt: string;
-  status: 'NEW' | 'PENDING' | 'SUCCESS' | 'FAILED';
-  statusCode: number;
-  failedDeliveryCount: number;
-  supplierName: string;
-  supplierPhone: string;
-  supplierEmail: string;
-  supplierAddress: string;
-  receiverName: string;
-  receiverPhone: string;
-  receiverEmail: string;
-  receiverAddress: string;
-  warehouseId: number | null;
-  warehouseCode: string | null;
-  warehouseName: string | null;
-}
+import { type Order } from '../services/orderService';
 
 defineProps<{
   orders: Order[];
