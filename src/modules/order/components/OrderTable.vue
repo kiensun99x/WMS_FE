@@ -109,6 +109,7 @@ import { type Order } from '../services/orderService';
 // ===== PROPS =====
 // orders: Danh sách đơn hàng cần hiển thị
 // showCheckbox: Hiển thị cột checkbox (cho multi-select)
+// Giới hạn số đơn hàng được chọn (nếu có)
 // showStatus: Hiển thị cột Trạng thái
 // showWarehouse: Hiển thị cột Tên kho
 // showFailedCount: Hiển thị cột Số lần giao thất bại
@@ -116,6 +117,7 @@ import { type Order } from '../services/orderService';
 const props = withDefaults(defineProps<{
   orders: Order[];
   selectedOrders?: number[]; 
+  maxSelect?: number;  
   showCheckbox?: boolean;
   showStatus?: boolean;
   showWarehouse?: boolean;
@@ -155,17 +157,30 @@ const toggleSelectAll = () => {
     emit('update:selectedOrders', newSelected);
   } else {
     // Chọn tất cả - Thêm IDs từ orders (giữ IDs cũ)
-    const orderIds = props.orders.map(o => o.id);
-    const newSelected = [...new Set([...currentSelected, ...orderIds])];
-    emit('update:selectedOrders', newSelected);
+    props.orders.forEach(order => {
+      // Nếu có giới hạn maxSelect và đã đạt giới hạn, không thêm nữa
+      if (props.maxSelect && currentSelected.length >= props.maxSelect) {
+        alert(`Bạn chỉ có thể chọn tối đa ${props.maxSelect} đơn hàng.`);
+        return;
+      }
+      if (!currentSelected.includes(order.id)) {
+        currentSelected.push(order.id);
+      }
+    });
+    emit('update:selectedOrders', currentSelected);
   }
 };
 
 // ☑️ Xử lý click vào checkbox riêng lẻ
+// - Nếu có giới hạn maxSelect và đã đạt giới hạn khi muốn thêm, show alert và không thêm nữa
 // - Tìm đơn hàng trong danh sách chọn
 // - Nếu đã chọn: bỏ chọn
 // - Nếu chưa chọn: thêm vào danh sách chọn
 const toggleSelect = (id: number) => {
+  if (props.maxSelect && props.selectedOrders && !props.selectedOrders.includes(id) && props.selectedOrders.length >= props.maxSelect) {
+    alert(`Bạn chỉ có thể chọn tối đa ${props.maxSelect} đơn hàng.`);
+    return;
+  }
   const currentSelected = props.selectedOrders || [];
   const index = currentSelected.indexOf(id);
   

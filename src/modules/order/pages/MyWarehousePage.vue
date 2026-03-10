@@ -47,6 +47,7 @@
       <OrderTable
         :orders="orders"
         :selectedOrders="selectedOrders"
+        :maxSelect="MAX_EXPORT"
         :showCheckbox="true"
         :showStatus="true"
         :showWarehouse="false"
@@ -80,6 +81,7 @@ import { fetchOrders, type Order, type SearchOrderRequest } from '../services/or
 import { authStore } from '@/modules/auth/store/authStore';
 import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
 
+const MAX_EXPORT = 10;  // Giới hạn số đơn hàng được chọn để xuất nhãn cùng lúc
 // ===== STATE =====
 // Danh sách đơn hàng từ API
 const orders = ref<Order[]>([]);
@@ -209,10 +211,16 @@ const handleExportLabels = () => {
     alert('Vui lòng chọn ít nhất một đơn hàng');
     return;
   }
-  // TODO: Implement export functionality
-  console.log('Exporting labels for orders:', selectedOrders.value);
-  alert(`Xuất nhãn cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
-  clearSelected();  // Clear lựa chọn sau khi export
+    if (selectedOrders.value.length > MAX_EXPORT) {
+        alert(`Chỉ có thể chọn tối đa ${MAX_EXPORT} đơn hàng để xuất nhãn cùng lúc`);
+        return;
+    }
+    if (confirm(`Bạn có chắc muốn xuất nhãn giao hàng cho ${selectedOrders.value.length} đơn hàng đã chọn?`)) {
+        // TODO: Implement export functionality
+        console.log('Exporting labels for orders:', selectedOrders.value);
+        alert(`Xuất nhãn cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
+        clearSelected();  // Clear lựa chọn sau khi export
+    }
 };
 
 // Hủy bỏ tất cả lựa chọn đã chọn

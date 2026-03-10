@@ -46,6 +46,7 @@
       <OrderTable
         :orders="orders"
         :selectedOrders="selectedOrders"
+        :maxSelect="MAX_DISPATCH"
         :showCheckbox="true"
         :showStatus="false"
         :showWarehouse="false"
@@ -90,6 +91,7 @@ import OrderFilterBox from '../../order/components/OrderFilterBox.vue';
 import OrderPagination from '../../order/components/OrderPagination.vue';
 import { fetchOrders, type Order, type SearchOrderRequest } from '../../order/services/orderService';
 
+const MAX_DISPATCH = 100;  // Giới hạn số đơn hàng được chọn để điều phối cùng lúc
 // ===== STATE =====
 // Danh sách đơn hàng từ API
 const orders = ref<Order[]>([]);
@@ -196,10 +198,16 @@ const handleDispatch = () => {
     alert('Vui lòng chọn ít nhất một đơn hàng');
     return;
   }
-  // TODO: Implement dispatch functionality
-  console.log('Dispatching orders:', selectedOrders.value);
-  alert(`Xác nhận điều phối cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
-  clearSelected();
+  if (selectedOrders.value.length > MAX_DISPATCH) {
+    alert(`Chỉ có thể chọn tối đa ${MAX_DISPATCH} đơn hàng để điều phối cùng lúc`);
+    return;
+  }
+  if (confirm(`Bạn có chắc muốn điều phối ${selectedOrders.value.length} đơn hàng đã chọn?`)) {
+    // TODO: Implement dispatch functionality
+    console.log('Dispatching orders:', selectedOrders.value);
+    alert(`Xác nhận điều phối cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
+    clearSelected();
+  }
 };
 
 // Hủy bỏ tất cả lựa chọn đã chọn
