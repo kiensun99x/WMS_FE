@@ -63,3 +63,21 @@ export const fetchOrders = (filters: SearchOrderRequest, page: number = 0, size:
     }
   })
 }
+
+/**
+ * Export labels (nhãn giao hàng) for selected orders
+ * @param orderCodes - Array of order codes
+ * @returns Promise with blob data (file content)
+ */
+export const exportLabels = (orderCodes: string[]) => {
+  return http.post<Blob>(
+    '/orders/labels/',
+    { orderCodes },
+    {
+      responseType: 'blob',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+  )
+}

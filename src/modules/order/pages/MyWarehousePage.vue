@@ -77,7 +77,7 @@ import { ref, onMounted, computed } from 'vue';
 import OrderTable from '../components/OrderTable.vue';
 import OrderFilterBox from '../components/OrderFilterBox.vue';
 import OrderPagination from '../components/OrderPagination.vue';
-import { fetchOrders, type Order, type SearchOrderRequest } from '../services/orderService';
+import { fetchOrders, exportLabels, type Order, type SearchOrderRequest } from '../services/orderService';
 import { authStore } from '@/modules/auth/store/authStore';
 import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
 
@@ -205,7 +205,7 @@ const handlePageChange = (page: number) => {
 };
 
 // 📄 Xử lý khi user click "Xuất nhãn giao hàng"
-const handleExportLabels = () => {
+const handleExportLabels = async () => {
   // Check: có chọn đơn hàng không?
   if (selectedOrders.value.length === 0) {
     alert('Vui lòng chọn ít nhất một đơn hàng');
@@ -216,10 +216,46 @@ const handleExportLabels = () => {
         return;
     }
     if (confirm(`Bạn có chắc muốn xuất nhãn giao hàng cho ${selectedOrders.value.length} đơn hàng đã chọn?`)) {
-        // TODO: Implement export functionality
-        console.log('Exporting labels for orders:', selectedOrders.value);
-        alert(`Xuất nhãn cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
-        clearSelected();  // Clear lựa chọn sau khi export
+        try {
+            // Lấy danh sách order codes từ selectedOrders IDs
+            const orderCodes = orders.value
+                .filter(o => selectedOrders.value.includes(o.id))
+                .map(o => o.code);
+            
+            // Gọi API export labels
+            const response = await exportLabels(orderCodes);
+            
+            // Tạo blob URL để download file
+            const blob = response.data;
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // Lấy filename từ Content-Disposition header nếu có
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = `Labels_${new Date().toISOString().split('T')[0]}.xlsx`;
+            
+            if (contentDisposition && contentDisposition.includes('filename')) {
+                const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+?)(?:;|$)/);
+                if (filenameMatch) {
+                    filename = decodeURIComponent(filenameMatch[1]);
+                }
+            }
+            
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            
+            // Cleanup
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            alert(`Xuất nhãn thành công cho ${selectedOrders.value.length} đơn hàng`);
+            clearSelected();  // Clear lựa chọn sau khi export
+        } catch (error) {
+            console.error('Export labels failed:', error);
+            alert('Xuất nhãn thất bại. Vui lòng thử lại.');
+        }
     }
 };
 
