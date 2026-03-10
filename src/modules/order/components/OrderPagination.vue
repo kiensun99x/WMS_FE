@@ -74,20 +74,35 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
+// ===== PROPS =====
+// currentPage: Trang hiện tại (1-indexed)
+// totalPages: Tổng số trang
 const props = defineProps<{
   currentPage: number;
   totalPages: number;
 }>();
 
+// ===== EMIT =====
+// 'change-page': Phát sự kiện khi user click nút phân trang (1-indexed page number)
 const emit = defineEmits<{
   'change-page': [page: number];
 }>();
 
+// ===== COMPUTED =====
+// Tính các trang nằm giữa trang đầu và trang cuối
+// VD nếu currentPage = 5, totalPages = 10:
+// - Thứ 1: page 1
+// - Giữa: pages 4, 5, 6
+// - Dấu "...": nếu có khoảng cách
+// - Cuối: page 10
 const middlePages = computed(() => {
   const pages: number[] = [];
+  // Bắt đầu từ trang 2 (hoặc trang currentPage - 1, nếu currentPage >= 3)
   const start = Math.max(2, props.currentPage - 1);
+  // Kết thúc ở trang (totalPages - 1) (hoặc trang currentPage + 1, nếu currentPage <= totalPages - 2)
   const end = Math.min(props.totalPages - 1, props.currentPage + 1);
 
+  // Thêm tất cả các trang từ start đến end
   for (let i = start; i <= end; i++) {
     pages.push(i);
   }
@@ -95,12 +110,19 @@ const middlePages = computed(() => {
   return pages;
 });
 
+// ===== METHODS =====
+// ⬅️ Xử lý nút "Trang trước"
+// - Nếu đang ở trang 1, không làm gì
+// - Không thì phát sự kiện 'change-page' với trang trước
 const previousPage = () => {
   if (props.currentPage > 1) {
     emit('change-page', props.currentPage - 1);
   }
 };
 
+// ➡️ Xử lý nút "Trang sau"
+// - Nếu đang ở trang cuối, không làm gì
+// - Không thì phát sự kiện 'change-page' với trang sau
 const nextPage = () => {
   if (props.currentPage < props.totalPages) {
     emit('change-page', props.currentPage + 1);

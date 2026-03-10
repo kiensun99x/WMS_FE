@@ -68,81 +68,109 @@ import { fetchOrders, type Order, type SearchOrderRequest } from '../services/or
 import { authStore } from '@/modules/auth/store/authStore';
 import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
 
-// State
+// ===== STATE =====
+// Danh sách đơn hàng từ API
 const orders = ref<Order[]>([]);
+
+// Danh sách ID đơn hàng được chọn (cho nút "Xuất nhãn giao hàng")
 const selectedOrders = ref<number[]>([]);
+
+// Thông tin phân trang (size, trang hiện tại, tổng, tổng trang)
 const pageInfo = ref({
-  size: 10,
-  number: 0,
-  totalElements: 0,
-  totalPages: 0
+  size: 10,           // Số items per page
+  number: 0,          // Trang hiện tại (0-indexed)
+  totalElements: 0,   // Tổng số đơn hàng
+  totalPages: 0       // Tổng số trang
 });
+
+// Danh sách các kho hàng (dùng để hiện thị thông tin kho hiện tại)
 const warehouses = ref<Warehouse[]>([]);
+
+// Loading state cho API call
 const loading = ref(false);
 
-// Filter
+// ===== FILTER =====
+// Lưu các filter mà user nhập
 const filters = ref<SearchOrderRequest>({
-  orderCode: '',
-  supplierPhone: '',
-  receiverPhone: '',
-  statusCode: undefined,
+  orderCode: '',        // Mã đơn hàng
+  supplierPhone: '',    // SĐT nhà cung cấp
+  receiverPhone: '',    // SĐT người nhận
+  statusCode: undefined,  // Trạng thái (0-4)
 });
 
-// Computed
+// ===== COMPUTED =====
+// Hiển thị thông tin kho hiện tại
+// VD: "KHO-01 - Kho Hà Nội" hoặc "N/A" nếu không có kho
 const warehouseInfo = computed(() => {
-  if (!authStore.warehouseId) return 'N/A';
+  if (!authStore.warehouseId) return 'N/A';  // Nếu không login -> N/A
   const warehouse = warehouses.value.find(w => w.id === authStore.warehouseId);
   return warehouse ? `${warehouse.code} - ${warehouse.name}` : 'N/A';
 });
 
+// Tính số thứ tự item đầu tiên trên trang hiện tại
 const startItem = computed(() => {
   return pageInfo.value.totalElements === 0 ? 0 : (pageInfo.value.number) * pageInfo.value.size + 1;
 });
 
+// Tính số thứ tự item cuối cùng trên trang hiện tại
 const endItem = computed(() => {
   return Math.min((pageInfo.value.number + 1) * pageInfo.value.size, pageInfo.value.totalElements);
 });
 
-// Methods
+// ===== METHODS =====
+// 📧 Load danh sách đơn hàng chỉ của kho hiện tại
+// - Thêm warehouseId từ authStore vào filters
+// - Gửi API fetch với filters đã cập nhật
 const loadOrders = async (page: number = 0) => {
-  loading.value = true;
+  loading.value = true;  // Bắt đầu loading
   
   try {
-    // Add warehouseId to filter
+    // Tạo request object với thêm warehouseId
     const requestFilters = {
       ...filters.value,
-      warehouseId: authStore.warehouseId
+      warehouseId: authStore.warehouseId  // Thêm warehouseId bắt buộc
     };
 
+    // Gửi API
     const response = await fetchOrders(requestFilters as any, page, 10);
     const data = response.data;
     
+    // Cập nhật state nếu thành công
     if (data?.result) {
-      orders.value = data.result.content || [];
-      pageInfo.value = data.result.page;
+      orders.value = data.result.content || [];  // Danh sách đơn hàng
+      pageInfo.value = data.result.page;         // Info phân trang
     }
   } catch (error) {
     console.error('Load orders failed:', error);
   } finally {
-    loading.value = false;
+    loading.value = false;  // Stop loading dù success hay fail
   }
 };
 
+// 🏗️ Load danh sách các kho hàng (dùng hiển thị thông tin kho)
 const loadWarehouses = async () => {
   try {
-    const list = await getWarehouses();
+    const list = await getWarehouses();  // Gửi API get warehouses
     warehouses.value = list || [];
   } catch (error) {
     console.error('Load warehouses failed:', error);
   }
 };
 
+// 🔍 Xử lý khi user click "Tìm kiếm"
+// - Cập nhật filters
+// - Clear lựa chọn (selectedOrders) - vì dữ liệu thay đổi
+// - Reset về trang 1
 const handleSearch = (searchFilters: SearchOrderRequest) => {
-  filters.value = searchFilters;
-  selectedOrders.value = [];
-  loadOrders(0);
+  filters.value = searchFilters;      // Lưu filters
+  selectedOrders.value = [];          // Clear lựa chọn
+  loadOrders(0);                      // Load trang 1
 };
 
+// ↻ Xử lý khi user click "Đặt lại"
+// - Clear tất cả filters
+// - Clear lựa chọn
+// - Reset về trang 1
 const handleReset = () => {
   filters.value = {
     orderCode: '',
@@ -150,16 +178,21 @@ const handleReset = () => {
     receiverPhone: '',
     statusCode: undefined,
   };
-  selectedOrders.value = [];
+  selectedOrders.value = [];  // Clear lựa chọn
   loadOrders(0);
 };
 
+// ⬅️➡️ Xử lý khi user chuyển trang
+// - Clear lựa chọn (vì dữ liệu trang mới khác)
+// - Chuyển sang trang (page là 1-indexed, API cần 0-indexed)
 const handlePageChange = (page: number) => {
-  selectedOrders.value = [];
-  loadOrders(page - 1);
+  selectedOrders.value = [];  // Clear lựa chọn
+  loadOrders(page - 1);       // Trừ 1 để convert sang 0-indexed
 };
 
+// 📄 Xử lý khi user click "Xuất nhãn giao hàng"
 const handleExportLabels = () => {
+  // Check: có chọn đơn hàng không?
   if (selectedOrders.value.length === 0) {
     alert('Vui lòng chọn ít nhất một đơn hàng');
     return;
@@ -169,9 +202,11 @@ const handleExportLabels = () => {
   alert(`Xuất nhãn cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
 };
 
-// Lifecycle
+// ⚙️ LIFECYCLE: Khi component được mount (trang load lần đầu)
+// - Load danh sách kho hàng thước
+// - Rồi load danh sách đơn hàng của kho hiện tại
 onMounted(async () => {
-  await loadWarehouses();
-  loadOrders(0);
+  await loadWarehouses();  // Load kho trước (cần cho warehouseInfo)
+  loadOrders(0);           // Rồi load đơn hàng trang 1
 });
 </script>

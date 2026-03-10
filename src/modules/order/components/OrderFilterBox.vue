@@ -98,6 +98,9 @@ import { ref, onMounted } from 'vue';
 import type { SearchOrderRequest } from '../services/orderService';
 import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
 
+// ===== PROPS =====
+// hideWarehouse: Ẩn filter "Mã kho hàng" (khi không cần)
+// hideStatus: Ẩn filter "Trạng thái đơn hàng" (khi không cần)
 const props = withDefaults(defineProps<{
   hideWarehouse?: boolean;
   hideStatus?: boolean;
@@ -106,13 +109,20 @@ const props = withDefaults(defineProps<{
   hideStatus: false,
 });
 
+// ===== STATE =====
+// Danh sách các kho hàng (dùng cho dropdown warehouse)
 const warehouses = ref<Warehouse[]>([])
 
+// ===== EMIT =====
+// 'search': Phát sự kiện khi user click "Tìm kiếm" với filters đã nhập
+// 'reset': Phát sự kiện khi user click "Đặt lại"
 const emit = defineEmits<{
   search: [filters: SearchOrderRequest];
   reset: [];
 }>();
 
+// ===== FILTER STATE =====
+// Lưu các filter mà user nhập (chưa gửi API)
 const localFilters = ref<SearchOrderRequest>({
   orderCode: '',
   supplierPhone: '',
@@ -121,10 +131,16 @@ const localFilters = ref<SearchOrderRequest>({
   warehouseCode: '',
 });
 
+// ===== METHODS =====
+// 🔍 Xử lý khi user click "Tìm kiếm"
+// - Phát event 'search' với filters hiện tại
 const applyFilters = () => {
   emit('search', localFilters.value);
 };
 
+// ↻ Xử lý khi user click "Đặt lại"
+// - Clear tất cả filters
+// - Phát event 'reset'
 const resetFilters = () => {
   localFilters.value = {
     orderCode: '',
@@ -136,6 +152,7 @@ const resetFilters = () => {
   emit('reset');
 };
 
+// 🏗️ Load danh sách kho hàng từ API
 const loadWarehouses = async () => {
   try {
     const list = await getWarehouses() || []
@@ -147,5 +164,7 @@ const loadWarehouses = async () => {
   }
 }
 
+// ⚙️ LIFECYCLE: Khi component được mount
+// - Load danh sách kho hàng để hiển thị trong dropdown
 onMounted(loadWarehouses);
 </script>

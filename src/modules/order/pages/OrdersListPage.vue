@@ -32,63 +32,93 @@ import OrderPagination from '../components/OrderPagination.vue';
 import { fetchOrders, type Order, type SearchOrderRequest } from '../services/orderService';
 
 
-// State
+// ===== STATE =====
+// Danh sách đơn hàng từ API
 const orders = ref<Order[]>([])
+
+// Thông tin phân trang (size, trang hiện tại, tổng, tổng trang)
 const pageInfo = ref({
-  size: 10,
-  number: 0,
-  totalElements: 0,
-  totalPages: 0
+  size: 10,           // Số items per page
+  number: 0,          // Trang hiện tại (0-indexed)
+  totalElements: 0,   // Tổng số đơn hàng
+  totalPages: 0       // Tổng số trang
 })
+
+// Loading state cho API call
 const isLoading = ref(false)
+
+// Error message nếu API fail
 const error = ref<string | null>(null)
 
-// Filter state
+// ===== FILTER =====
+// Lưu các filter mà user nhập
 const searchFilters = ref<SearchOrderRequest>({
-  orderCode: '',
-  supplierPhone: '',
-  receiverPhone: '',
-  statusCode: undefined,
-  warehouseCode: '',
+  orderCode: '',        // Mã đơn hàng
+  supplierPhone: '',    // SĐT nhà cung cấp
+  receiverPhone: '',    // SĐT người nhận
+  statusCode: undefined,  // Trạng thái (0-4)
+  warehouseCode: '',    // Mã kho
 });
 
+// Trang hiện tại (1-indexed cho display)
 const currentPage = ref(1);
 
+// ===== COMPUTED =====
+// Tính số thứ tự item đầu tiên trên trang hiện tại
+// VD: trang 1, 10 items/page -> startItem = 1
+// VD: trang 2, 10 items/page -> startItem = 11
 const startItem = computed(() => {
   return pageInfo.value.totalElements === 0 ? 0 : (pageInfo.value.number) * pageInfo.value.size + 1;
 });
 
+// Tính số thứ tự item cuối cùng trên trang hiện tại
+// VD: trang 1, 10 items/page, 25 total -> endItem = 10
+// VD: trang 3, 10 items/page, 25 total -> endItem = 25
 const endItem = computed(() => {
   return Math.min((pageInfo.value.number + 1) * pageInfo.value.size, pageInfo.value.totalElements);
 });
 
-// Methods
+// ===== METHODS =====
+// 📥 Load danh sách đơn hàng từ API
+// page: trang cần load (0-indexed)
 const loadOrders = async (page: number = 0) => {
-  isLoading.value = true
-  error.value = null
+  isLoading.value = true  // Bắt đầu loading
+  error.value = null      // Clear error cũ
   
   try {
+    // Gọi API với filters hiện tại, trang, và 10 items per page
     const response = await fetchOrders(searchFilters.value, page, 10)
     const data = response.data
     
+    // Nếu API thành công, cập nhật state
     if (data.result) {
-      orders.value = data.result.content
-      pageInfo.value = data.result.page
-      currentPage.value = page + 1 // Convert to 1-indexed for display
+      orders.value = data.result.content                        // Danh sách đơn hàng
+      pageInfo.value = data.result.page                         // Info phân trang
+      currentPage.value = page + 1                              // Convert 0-indexed -> 1-indexed
     }
   } catch (err: any) {
+    // Nếu API fail, lưu error message
     error.value = err.message || 'Lỗi khi tải dữ liệu'
     console.error('Error loading orders:', err)
   } finally {
+    // Dù success hay fail, cũng stop loading
     isLoading.value = false
   }
 }
 
+// 🔍 Xử lý khi user click "Tìm kiếm"
+// - Cập nhật filters
+// - Reset về trang 1 (vì search mới)
+// - Gọi API load lại dữ liệu
 const handleSearch = (filters: SearchOrderRequest) => {
-  searchFilters.value = filters;
-  loadOrders(0); // Reset to first page on new search
+  searchFilters.value = filters;      // Lưu filters từ user
+  loadOrders(0);                      // Load trang 1 (0-indexed)
 };
 
+// ↻ Xử lý khi user click "Đặt lại"
+// - Clear tất cả filters
+// - Reset về trang 1
+// - Gọi API load lại dữ liệu từ đầu
 const handleReset = () => {
   searchFilters.value = {
     orderCode: '',
@@ -100,13 +130,16 @@ const handleReset = () => {
   loadOrders(0);
 };
 
+// ⬅️➡️ Xử lý khi user chuyển trang
+// - page từ Pagination component là 1-indexed
+// - Cần convert sang 0-indexed để gửi API
 const handlePageChange = (page: number) => {
-  // page là 1-indexed, vì thế cần convert sang 0-indexed cho API
-  loadOrders(page - 1)
+  loadOrders(page - 1)  // Trừ 1 để convert sang 0-indexed
 };
 
-// Load data khi component mount
+// ⚙️ LIFECYCLE: Khi component được mount (trang load lần đầu)
+// - Load danh sách đơn hàng trang 1
 onMounted(() => {
-  loadOrders(0)
+  loadOrders(0)  // Load trang 1 (0-indexed)
 })
 </script>

@@ -4,7 +4,7 @@
       <thead>
         <tr class="bg-gray-50 border-b border-gray-200">
           <!-- Checkbox -->
-          <th v-if="showCheckbox" class="px-4 py-3">
+          <th v-if="showCheckbox" class="px-4 py-3 text-left">
             <input 
               type="checkbox" 
               :checked="allSelected" 
@@ -106,6 +106,12 @@
 import { computed, ref } from 'vue';
 import { type Order } from '../services/orderService';
 
+// ===== PROPS =====
+// orders: Danh sách đơn hàng cần hiển thị
+// showCheckbox: Hiển thị cột checkbox (cho multi-select)
+// showStatus: Hiển thị cột Trạng thái
+// showWarehouse: Hiển thị cột Tên kho
+// showFailedCount: Hiển thị cột Số lần giao thất bại
 const props = withDefaults(defineProps<{
   orders: Order[];
   showCheckbox?: boolean;
@@ -119,35 +125,51 @@ const props = withDefaults(defineProps<{
   showFailedCount: false,
 });
 
+// ===== EMIT =====
+// 'update:selectedOrders': Phát sự kiện khi user chọn/bỏ chọn đơn hàng
 const emit = defineEmits<{
   'update:selectedOrders': [ids: number[]];
 }>();
 
+// ===== STATE =====
+// Danh sách ID đơn hàng được chọn
 const selectedOrders = ref<number[]>([]);
 
+// ===== COMPUTED =====
+// Kiểm tra xem tất cả đơn hàng trên trang này có được chọn không?
 const allSelected = computed(() => {
   return selectedOrders.value.length === props.orders.length && props.orders.length > 0;
 });
 
+// ===== METHODS =====
+// ☑️ Xử lý click vào checkbox "Select All"
+// - Nếu đang chọn tất cả: bỏ chọn hết
+// - Nếu chưa chọn tất cả: chọn tất cả
 const toggleSelectAll = () => {
   if (allSelected.value) {
-    selectedOrders.value = [];
+    selectedOrders.value = [];  // Bỏ chọn hết
   } else {
-    selectedOrders.value = props.orders.map(o => o.id);
+    selectedOrders.value = props.orders.map(o => o.id);  // Chọn tất cả
   }
-  emit('update:selectedOrders', selectedOrders.value);
+  emit('update:selectedOrders', selectedOrders.value);  // Phát sự kiện
 };
 
+// ☑️ Xử lý click vào checkbox riêng lẻ
+// - Tìm đơn hàng trong danh sách chọn
+// - Nếu đã chọn: bỏ chọn
+// - Nếu chưa chọn: thêm vào danh sách chọn
 const toggleSelect = (id: number) => {
   const index = selectedOrders.value.indexOf(id);
   if (index > -1) {
-    selectedOrders.value.splice(index, 1);
+    selectedOrders.value.splice(index, 1);  // Bỏ chọn
   } else {
-    selectedOrders.value.push(id);
+    selectedOrders.value.push(id);           // Thêm vào danh sách chọn
   }
-  emit('update:selectedOrders', selectedOrders.value);
+  emit('update:selectedOrders', selectedOrders.value);  // Phát sự kiện
 };
 
+// 🏷️ Chuyển đổi status code thành label tiếng Việt (để hiển thị)
+// VD: 'NEW' -> 'Mới', 'DELIVERED' -> 'Đã giao'
 const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
     NEW: 'Mới',
@@ -159,6 +181,8 @@ const getStatusLabel = (status: string) => {
   return labels[status] || status;
 };
 
+// 🎨 Lấy CSS class cho status badge (để hiển thị màu)
+// VD: 'NEW' -> blue badge, 'DELIVERED' -> green badge
 const getStatusClass = (status: string) => {
   const classes: Record<string, string> = {
     NEW: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800',
@@ -170,6 +194,9 @@ const getStatusClass = (status: string) => {
   return classes[status] || '';
 };
 
+// 📅 Format lại đường dây ngày/giờ sang định dạng Việt
+// Input: '2025-03-10T10:30:00Z'
+// Output: '10/03/2025 10:30'
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -182,12 +209,17 @@ const formatDate = (dateString: string) => {
   });
 };
 
+// 🔢 Tính số cột colspan cho hàng "Không có dữ liệu"
+// - Luôn có 4 cột: checkbox/no/code/date + supplier + receiver = 6 cột base
+// - Thêm 1 nếu hiển thị status
+// - Thêm 1 nếu hiển thị warehouse
+// - Thêm 1 nếu hiển thị failedCount
 const getColspan = () => {
-  let count = 4; // checkbox, no, code, date
+  let count = 4; // checkbox (nếu có), no, code, date
   if (props.showStatus) count++;
   if (props.showWarehouse) count++;
   if (props.showFailedCount) count++;
-  count += 2; // supplier, receiver
+  count += 2; // supplier, receiver (luôn có)
   return count;
 };
 </script>
