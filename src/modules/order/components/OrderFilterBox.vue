@@ -66,10 +66,7 @@
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           <option value="">Tất cả kho</option>
-          <option value="K-TTT">Kho Tôn Thất Thuyết</option>
-          <option value="K-SD">Kho Sơn Đồng</option>
-          <option value="K-TD">Kho Trương Định</option>
-          <option value="K-LT">Kho La Thành</option>
+          <option v-for="w in warehouses" :value="w.code">{{ w.name }}</option>
         </select>
       </div>
     </div>
@@ -95,8 +92,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import type { SearchOrderRequest } from '../services/orderService';
+import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
+
+const warehouses = ref<Warehouse[]>([])
 
 const emit = defineEmits<{
   search: [filters: SearchOrderRequest];
@@ -125,4 +125,17 @@ const resetFilters = () => {
   };
   emit('reset');
 };
+
+const loadWarehouses = async () => {
+  try {
+    const list = await getWarehouses() || []
+    warehouses.value = list
+    console.log(warehouses.value);
+    
+  } catch (err) {
+    console.error("Load warehouse failed", err)
+  }
+}
+
+onMounted(loadWarehouses);
 </script>

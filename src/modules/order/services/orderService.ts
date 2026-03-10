@@ -38,20 +38,6 @@ export interface SearchOrderRequest {
   statusCode?: number
   warehouseCode?: string
 }
-/**
- * Fetch orders from API with pagination
- * @param page - Page number (0-indexed)
- * @param size - Items per page
- * @returns ApiResponse with orders list and pagination info
- */
-// export const fetchOrders = (page: number = 0, size: number = 10) => {
-//   return http.get<ApiResponse<OrderPageResponse>>('/orders/', {
-//     params: {
-//       page,
-//       size
-//     }
-//   })
-// }
 
 /**
  * Get single order by ID
@@ -62,8 +48,11 @@ export const getOrderById = (id: number) => {
 }
 
 /**
- * Search orders with filters
+ * Fetch orders from API with pagination
+ * @param page - Page number (0-indexed)
+ * @param size - Items per page
  * @param filters - Search filters
+ * @returns ApiResponse with orders list and pagination info
  */
 export const fetchOrders = (filters: SearchOrderRequest, page: number = 0, size: number = 10) => {
   return http.get<ApiResponse<OrderPageResponse>>('/orders/', {
