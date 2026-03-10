@@ -3,17 +3,45 @@
     <table class="w-full">
       <thead>
         <tr class="bg-gray-50 border-b border-gray-200">
+          <!-- Checkbox -->
+          <th v-if="showCheckbox" class="px-4 py-3">
+            <input 
+              type="checkbox" 
+              :checked="allSelected" 
+              @change="toggleSelectAll"
+              class="rounded"
+            />
+          </th>
+
           <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">No</th>
           <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Mã đơn hàng</th>
           <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Ngày tạo</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Trạng thái</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tên kho</th>
+          
+          <!-- Status Column -->
+          <th v-if="showStatus" class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Trạng thái</th>
+          
+          <!-- Warehouse Column -->
+          <th v-if="showWarehouse" class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tên kho</th>
+          
+          <!-- Failed Delivery Count Column -->
+          <th v-if="showFailedCount" class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Số lần giao thất bại</th>
+          
           <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Nhà cung cấp</th>
           <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Người nhận</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-200">
         <tr v-for="(order, index) in orders" :key="order.id" class="hover:bg-gray-50 transition">
+          <!-- Checkbox -->
+          <td v-if="showCheckbox" class="px-4 py-4">
+            <input 
+              type="checkbox"
+              :checked="selectedOrders.includes(order.id)"
+              @change="toggleSelect(order.id)"
+              class="rounded"
+            />
+          </td>
+
           <!-- No -->
           <td class="px-6 py-4 text-sm text-gray-600">{{ index + 1 }}</td>
 
@@ -30,17 +58,22 @@
           <!-- Created Date -->
           <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(order.createdAt) }}</td>
 
-          <!-- Status -->
-          <td class="px-6 py-4 text-sm">
+          <!-- Status Column -->
+          <td v-if="showStatus" class="px-6 py-4 text-sm">
             <span :class="getStatusClass(order.status)">
               {{ getStatusLabel(order.status) }}
             </span>
           </td>
 
-          <!-- Warehouse -->
-          <td class="px-6 py-4 text-sm">
+          <!-- Warehouse Column -->
+          <td v-if="showWarehouse" class="px-6 py-4 text-sm">
             <div class="font-semibold text-gray-900">{{ order.warehouseCode || 'N/A' }}</div>
             <div class="text-gray-500 text-xs">{{ order.warehouseName || 'Chưa phân bổ' }}</div>
+          </td>
+
+          <!-- Failed Delivery Count Column -->
+          <td v-if="showFailedCount" class="px-6 py-4 text-sm text-gray-600">
+            {{ order.failedDeliveryCount }}
           </td>
 
           <!-- Supplier -->
@@ -60,7 +93,7 @@
 
         <!-- Empty State -->
         <tr v-if="orders.length === 0">
-          <td colspan="7" class="px-6 py-12 text-center">
+          <td :colspan="getColspan()" class="px-6 py-12 text-center">
             <div class="text-gray-500">Không có dữ liệu đơn hàng</div>
           </td>
         </tr>
@@ -70,11 +103,50 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue';
 import { type Order } from '../services/orderService';
 
-defineProps<{
+const props = withDefaults(defineProps<{
   orders: Order[];
+  showCheckbox?: boolean;
+  showStatus?: boolean;
+  showWarehouse?: boolean;
+  showFailedCount?: boolean;
+}>(), {
+  showCheckbox: false,
+  showStatus: true,
+  showWarehouse: true,
+  showFailedCount: false,
+});
+
+const emit = defineEmits<{
+  'update:selectedOrders': [ids: number[]];
 }>();
+
+const selectedOrders = ref<number[]>([]);
+
+const allSelected = computed(() => {
+  return selectedOrders.value.length === props.orders.length && props.orders.length > 0;
+});
+
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    selectedOrders.value = [];
+  } else {
+    selectedOrders.value = props.orders.map(o => o.id);
+  }
+  emit('update:selectedOrders', selectedOrders.value);
+};
+
+const toggleSelect = (id: number) => {
+  const index = selectedOrders.value.indexOf(id);
+  if (index > -1) {
+    selectedOrders.value.splice(index, 1);
+  } else {
+    selectedOrders.value.push(id);
+  }
+  emit('update:selectedOrders', selectedOrders.value);
+};
 
 const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
@@ -108,5 +180,14 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+};
+
+const getColspan = () => {
+  let count = 4; // checkbox, no, code, date
+  if (props.showStatus) count++;
+  if (props.showWarehouse) count++;
+  if (props.showFailedCount) count++;
+  count += 2; // supplier, receiver
+  return count;
 };
 </script>

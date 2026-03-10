@@ -43,7 +43,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <!-- Status Filter -->
-      <div>
+      <div v-if="!hideStatus">
         <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái đơn hàng</label>
         <select
           v-model="localFilters.statusCode"
@@ -59,7 +59,7 @@
       </div>
 
       <!-- Warehouse Filter -->
-      <div>
+      <div v-if="!hideWarehouse">
         <label class="block text-sm font-medium text-gray-700 mb-2">Mã kho hàng</label>
         <select
           v-model="localFilters.warehouseCode"
@@ -88,6 +88,8 @@
         <span>Tìm kiếm</span>
       </button>
     </div>
+
+    
   </div>
 </template>
 
@@ -95,6 +97,14 @@
 import { ref, onMounted } from 'vue';
 import type { SearchOrderRequest } from '../services/orderService';
 import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
+
+const props = withDefaults(defineProps<{
+  hideWarehouse?: boolean;
+  hideStatus?: boolean;
+}>(), {
+  hideWarehouse: false,
+  hideStatus: false,
+});
 
 const warehouses = ref<Warehouse[]>([])
 

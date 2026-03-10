@@ -4,6 +4,7 @@ import type { RouteRecordRaw } from "vue-router"
 import OrdersListPage from "../modules/order/pages/OrdersListPage.vue"
 import CreateOrderPage from "../modules/order/pages/CreateOrderPage.vue"
 import OrderDetailPage from "../modules/order/pages/OrderDetailPage.vue"
+import MyWarehousePage from "../modules/order/pages/MyWarehousePage.vue"
 
 import WarehousePage from "../pages/WarehousePage.vue"
 import DispatchPage from "../modules/dispatch/pages/DispatchPage.vue"
@@ -47,10 +48,10 @@ const routes: Array<RouteRecordRaw> = [
   },
 
   {
-    path: "/warehouse",
-    name: "Warehouse",
-    meta: { title: 'Kho hàng của tôi', subtitle: 'Quản lý hàng trong  kho' },
-    component: WarehousePage
+    path: "/my-warehouse",
+    name: "MyWarehouse",
+    meta: { title: 'Kho hàng của tôi', subtitle: 'Quản lý hàng trong kho của bạn' },
+    component: MyWarehousePage
   },
 
   {
@@ -64,7 +65,7 @@ const routes: Array<RouteRecordRaw> = [
 
   {
     path: "/",
-    redirect: "/hello"
+    redirect: "/orders"
   },
 
   {
