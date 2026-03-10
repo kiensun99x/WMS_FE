@@ -8,7 +8,7 @@
             <input 
               type="checkbox" 
               :checked="allSelected" 
-              @change="toggleSelectAll"
+              @change="toggleSelectAll($event)"
               class="rounded"
             />
           </th>
@@ -37,7 +37,7 @@
             <input 
               type="checkbox"
               :checked="props.selectedOrders?.includes(order.id)"
-              @change="toggleSelect(order.id)"
+              @change="toggleSelect(order.id, $event)"
               class="rounded"
             />
           </td>
@@ -147,28 +147,33 @@ const allSelected = computed(() => {
 // ☑️ Xử lý click vào checkbox "Select All"
 // - Nếu đang chọn tất cả: bỏ chọn hết (chỉ loại bỏ orders hiện tại)
 // - Nếu chưa chọn tất cả: chọn tất cả (thêm IDs của page orders hiện tại vào selectedOrders)
-const toggleSelectAll = () => {
-  const currentSelected = props.selectedOrders || [];
+const toggleSelectAll = (event: Event) => {
+  const currentSelected = [...(props.selectedOrders || [])];
   
   if (allSelected.value) {
-    // Bỏ chọn hết - Chỉ loại bỏ những ID có trong orders hiện tại
     const orderIds = props.orders.map(o => o.id);
     const newSelected = currentSelected.filter(id => !orderIds.includes(id));
     emit('update:selectedOrders', newSelected);
-  } else {
-    // Chọn tất cả - Thêm IDs từ orders (giữ IDs cũ)
-    props.orders.forEach(order => {
-      // Nếu có giới hạn maxSelect và đã đạt giới hạn, không thêm nữa
-      if (props.maxSelect && currentSelected.length >= props.maxSelect) {
-        alert(`Bạn chỉ có thể chọn tối đa ${props.maxSelect} đơn hàng.`);
-        return;
-      }
-      if (!currentSelected.includes(order.id)) {
-        currentSelected.push(order.id);
-      }
-    });
-    emit('update:selectedOrders', currentSelected);
+    return;
   }
+  //số lượng đon hàng có thể chọn thêm
+  const remaining = props.maxSelect
+    ? props.maxSelect - currentSelected.length
+    : props.orders.length;
+    
+  if (props.maxSelect && remaining <= 0) {
+    alert(`Bạn chỉ có thể chọn tối đa ${props.maxSelect} đơn hàng.`);
+    const checkbox = event.target as HTMLInputElement;
+    checkbox.checked = false; // Bỏ chọn checkbox nếu vượt quá giới hạn
+    return;
+  }
+
+  const newSelected = props.orders
+    .map(o => o.id)
+    .filter(id => !currentSelected.includes(id))
+    .slice(0, remaining); //cắt mảng nếu vượt quá giới hạn
+
+  emit('update:selectedOrders', [...currentSelected, ...newSelected]);
 };
 
 // ☑️ Xử lý click vào checkbox riêng lẻ
@@ -176,21 +181,29 @@ const toggleSelectAll = () => {
 // - Tìm đơn hàng trong danh sách chọn
 // - Nếu đã chọn: bỏ chọn
 // - Nếu chưa chọn: thêm vào danh sách chọn
-const toggleSelect = (id: number) => {
-  if (props.maxSelect && props.selectedOrders && !props.selectedOrders.includes(id) && props.selectedOrders.length >= props.maxSelect) {
+const toggleSelect = (id: number, event: Event) => {
+  const currentSelected = [...(props.selectedOrders || [])];
+
+  if (
+    props.maxSelect &&
+    !currentSelected.includes(id) &&
+    currentSelected.length >= props.maxSelect
+  ) {
     alert(`Bạn chỉ có thể chọn tối đa ${props.maxSelect} đơn hàng.`);
+    const checkbox = event.target as HTMLInputElement;
+    checkbox.checked = false; // Bỏ chọn checkbox nếu vượt quá giới hạn
     return;
   }
-  const currentSelected = props.selectedOrders || [];
-  const index = currentSelected.indexOf(id);
-  
-  let newSelected: number[];
-  if (index > -1) {
-    newSelected = currentSelected.filter((_, i) => i !== index);  // Bỏ chọn
+
+  let newSelected;
+
+  if (currentSelected.includes(id)) {
+    newSelected = currentSelected.filter(i => i !== id); // Bỏ chọn
   } else {
-    newSelected = [...currentSelected, id];  // Thêm vào danh sách chọn
+    newSelected = [...currentSelected, id];
   }
-  emit('update:selectedOrders', newSelected);  // Phát sự kiện cập nhật parent
+
+  emit('update:selectedOrders', newSelected);
 };
 
 // 🏷️ Chuyển đổi status code thành label tiếng Việt (để hiển thị)
