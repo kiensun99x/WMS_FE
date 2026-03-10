@@ -44,29 +44,17 @@
     </div>
 
     <!-- Pagination -->
-    <div class="mt-6 flex justify-between items-center">
+    <div class="mt-6 flex items-center justify-between">
       <div class="text-sm text-gray-600">
-        Hiển thị <span class="font-semibold">{{ pageNumber * pageSize + 1 }}</span> đến 
-        <span class="font-semibold">{{ (pageNumber + 1) * pageSize }}</span>
-        trong số <span class="font-semibold">{{ totalElements }}</span> kết quả
+        Hiển thị <span class="font-semibold">{{ startItem }}</span> đến
+        <span class="font-semibold">{{ endItem }}</span> trong số
+        <span class="font-semibold">{{ pageInfo.totalElements }}</span> kết quả
       </div>
-      <div class="flex gap-2">
-        <button
-          :disabled="pageNumber === 0"
-          @click="previousPage"
-          class="px-3 py-2 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed rounded transition"
-        >
-          ←
-        </button>
-        <span class="px-3 py-2">Trang {{ pageNumber + 1 }}</span>
-        <button
-          :disabled="(pageNumber + 1) * pageSize >= totalElements"
-          @click="nextPage"
-          class="px-3 py-2 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed rounded transition"
-        >
-          →
-        </button>
-      </div>
+      <OrderPagination
+        :current-page="pageInfo.number + 1"
+        :total-pages="pageInfo.totalPages"
+        @change-page="handlePageChange"
+      />
     </div>
   </div>
 </template>
@@ -75,6 +63,7 @@
 import { ref, onMounted, computed } from 'vue';
 import OrderTable from '../components/OrderTable.vue';
 import OrderFilterBox from '../components/OrderFilterBox.vue';
+import OrderPagination from '../components/OrderPagination.vue';
 import { fetchOrders, type Order, type SearchOrderRequest } from '../services/orderService';
 import { authStore } from '@/modules/auth/store/authStore';
 import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
@@ -82,9 +71,12 @@ import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouse
 // State
 const orders = ref<Order[]>([]);
 const selectedOrders = ref<number[]>([]);
-const pageNumber = ref(0);
-const pageSize = ref(10);
-const totalElements = ref(0);
+const pageInfo = ref({
+  size: 10,
+  number: 0,
+  totalElements: 0,
+  totalPages: 0
+});
 const warehouses = ref<Warehouse[]>([]);
 const loading = ref(false);
 
@@ -103,22 +95,31 @@ const warehouseInfo = computed(() => {
   return warehouse ? `${warehouse.code} - ${warehouse.name}` : 'N/A';
 });
 
+const startItem = computed(() => {
+  return pageInfo.value.totalElements === 0 ? 0 : (pageInfo.value.number) * pageInfo.value.size + 1;
+});
+
+const endItem = computed(() => {
+  return Math.min((pageInfo.value.number + 1) * pageInfo.value.size, pageInfo.value.totalElements);
+});
+
 // Methods
-const loadOrders = async () => {
+const loadOrders = async (page: number = 0) => {
+  loading.value = true;
+  
   try {
-    loading.value = true;
-    
     // Add warehouseId to filter
     const requestFilters = {
       ...filters.value,
       warehouseId: authStore.warehouseId
     };
 
-    const response = await fetchOrders(requestFilters as any, pageNumber.value, pageSize.value);
+    const response = await fetchOrders(requestFilters as any, page, 10);
+    const data = response.data;
     
-    if (response.data?.result) {
-      orders.value = response.data.result.content || [];
-      totalElements.value = response.data.result.page?.totalElements || 0;
+    if (data?.result) {
+      orders.value = data.result.content || [];
+      pageInfo.value = data.result.page;
     }
   } catch (error) {
     console.error('Load orders failed:', error);
@@ -136,23 +137,26 @@ const loadWarehouses = async () => {
   }
 };
 
-const handleSearch = async (searchFilters: SearchOrderRequest) => {
+const handleSearch = (searchFilters: SearchOrderRequest) => {
   filters.value = searchFilters;
-  pageNumber.value = 0;
   selectedOrders.value = [];
-  await loadOrders();
+  loadOrders(0);
 };
 
-const handleReset = async () => {
+const handleReset = () => {
   filters.value = {
     orderCode: '',
     supplierPhone: '',
     receiverPhone: '',
     statusCode: undefined,
   };
-  pageNumber.value = 0;
   selectedOrders.value = [];
-  await loadOrders();
+  loadOrders(0);
+};
+
+const handlePageChange = (page: number) => {
+  selectedOrders.value = [];
+  loadOrders(page - 1);
 };
 
 const handleExportLabels = () => {
@@ -165,25 +169,9 @@ const handleExportLabels = () => {
   alert(`Xuất nhãn cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
 };
 
-const nextPage = async () => {
-  if ((pageNumber.value + 1) * pageSize.value < totalElements.value) {
-    pageNumber.value++;
-    selectedOrders.value = [];
-    await loadOrders();
-  }
-};
-
-const previousPage = async () => {
-  if (pageNumber.value > 0) {
-    pageNumber.value--;
-    selectedOrders.value = [];
-    await loadOrders();
-  }
-};
-
 // Lifecycle
 onMounted(async () => {
   await loadWarehouses();
-  await loadOrders();
+  loadOrders(0);
 });
 </script>

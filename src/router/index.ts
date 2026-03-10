@@ -7,7 +7,7 @@ import OrderDetailPage from "../modules/order/pages/OrderDetailPage.vue"
 import MyWarehousePage from "../modules/order/pages/MyWarehousePage.vue"
 
 import WarehousePage from "../pages/WarehousePage.vue"
-import DispatchPage from "../modules/dispatch/pages/DispatchPage.vue"
+import DispatchPage from "../modules/order/pages/DispatchPage.vue"
 import { reportRoutes } from "../modules/report/routes/reportRoutes"
 import { authRoutes } from "../modules/auth/routes/authRoutes"
 import HelloWorldPage from "../pages/HelloWorldPage.vue"
