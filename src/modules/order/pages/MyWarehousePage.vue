@@ -21,20 +21,32 @@
       <div class="text-blue-900">
         <span class="font-semibold">{{ selectedOrders.length }} đơn hàng</span> được chọn
       </div>
-      <button
+      <div class="flex gap-2">
+        <button
+            :disabled="selectedOrders.length === 0"
+            @click="handleExportLabels"
+            class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
+        >
+            <span>📄</span>
+            <span>Xuất nhãn giao hàng ({{ selectedOrders.length }}/{{ orders.length }})</span>
+        </button>
+        <button
         :disabled="selectedOrders.length === 0"
-        @click="handleExportLabels"
-        class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
+        @click="clearSelected"
+        class="flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
       >
-        <span>📄</span>
-        <span>Xuất nhãn giao hàng ({{ selectedOrders.length }}/{{ orders.length }})</span>
+        <span>x</span>
+        <span>Hủy bỏ</span>
       </button>
+      </div>
+      
     </div>
 
     <!-- Orders Table -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <OrderTable
         :orders="orders"
+        :selectedOrders="selectedOrders"
         :showCheckbox="true"
         :showStatus="true"
         :showWarehouse="false"
@@ -163,7 +175,7 @@ const loadWarehouses = async () => {
 // - Reset về trang 1
 const handleSearch = (searchFilters: SearchOrderRequest) => {
   filters.value = searchFilters;      // Lưu filters
-  selectedOrders.value = [];          // Clear lựa chọn
+  clearSelected();                    // Clear lựa chọn
   loadOrders(0);                      // Load trang 1
 };
 
@@ -178,7 +190,7 @@ const handleReset = () => {
     receiverPhone: '',
     statusCode: undefined,
   };
-  selectedOrders.value = [];  // Clear lựa chọn
+  clearSelected();  // Clear lựa chọn
   loadOrders(0);
 };
 
@@ -186,7 +198,7 @@ const handleReset = () => {
 // - Clear lựa chọn (vì dữ liệu trang mới khác)
 // - Chuyển sang trang (page là 1-indexed, API cần 0-indexed)
 const handlePageChange = (page: number) => {
-  selectedOrders.value = [];  // Clear lựa chọn
+//   clearSelected();  // Clear lựa chọn
   loadOrders(page - 1);       // Trừ 1 để convert sang 0-indexed
 };
 
@@ -200,6 +212,12 @@ const handleExportLabels = () => {
   // TODO: Implement export functionality
   console.log('Exporting labels for orders:', selectedOrders.value);
   alert(`Xuất nhãn cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
+  clearSelected();  // Clear lựa chọn sau khi export
+};
+
+// Hủy bỏ tất cả lựa chọn đã chọn
+const clearSelected = () => {
+  selectedOrders.value = [];
 };
 
 // ⚙️ LIFECYCLE: Khi component được mount (trang load lần đầu)

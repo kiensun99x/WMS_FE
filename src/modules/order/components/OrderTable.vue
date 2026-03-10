@@ -36,7 +36,7 @@
           <td v-if="showCheckbox" class="px-4 py-4">
             <input 
               type="checkbox"
-              :checked="selectedOrders.includes(order.id)"
+              :checked="props.selectedOrders?.includes(order.id)"
               @change="toggleSelect(order.id)"
               class="rounded"
             />
@@ -112,13 +112,16 @@ import { type Order } from '../services/orderService';
 // showStatus: Hiển thị cột Trạng thái
 // showWarehouse: Hiển thị cột Tên kho
 // showFailedCount: Hiển thị cột Số lần giao thất bại
+// selectedOrders: Danh sách ID được chọn (từ parent) - để sync state
 const props = withDefaults(defineProps<{
   orders: Order[];
+  selectedOrders?: number[]; 
   showCheckbox?: boolean;
   showStatus?: boolean;
   showWarehouse?: boolean;
   showFailedCount?: boolean;
 }>(), {
+  selectedOrders: () => [],
   showCheckbox: false,
   showStatus: true,
   showWarehouse: true,
@@ -131,27 +134,31 @@ const emit = defineEmits<{
   'update:selectedOrders': [ids: number[]];
 }>();
 
-// ===== STATE =====
-// Danh sách ID đơn hàng được chọn
-const selectedOrders = ref<number[]>([]);
-
 // ===== COMPUTED =====
 // Kiểm tra xem tất cả đơn hàng trên trang này có được chọn không?
 const allSelected = computed(() => {
-  return selectedOrders.value.length === props.orders.length && props.orders.length > 0;
+  if (props.orders.length === 0) return false;
+  return props.orders.every(o => props.selectedOrders?.includes(o.id));
 });
 
 // ===== METHODS =====
 // ☑️ Xử lý click vào checkbox "Select All"
-// - Nếu đang chọn tất cả: bỏ chọn hết
-// - Nếu chưa chọn tất cả: chọn tất cả
+// - Nếu đang chọn tất cả: bỏ chọn hết (chỉ loại bỏ orders hiện tại)
+// - Nếu chưa chọn tất cả: chọn tất cả (thêm IDs của page orders hiện tại vào selectedOrders)
 const toggleSelectAll = () => {
+  const currentSelected = props.selectedOrders || [];
+  
   if (allSelected.value) {
-    selectedOrders.value = [];  // Bỏ chọn hết
+    // Bỏ chọn hết - Chỉ loại bỏ những ID có trong orders hiện tại
+    const orderIds = props.orders.map(o => o.id);
+    const newSelected = currentSelected.filter(id => !orderIds.includes(id));
+    emit('update:selectedOrders', newSelected);
   } else {
-    selectedOrders.value = props.orders.map(o => o.id);  // Chọn tất cả
+    // Chọn tất cả - Thêm IDs từ orders (giữ IDs cũ)
+    const orderIds = props.orders.map(o => o.id);
+    const newSelected = [...new Set([...currentSelected, ...orderIds])];
+    emit('update:selectedOrders', newSelected);
   }
-  emit('update:selectedOrders', selectedOrders.value);  // Phát sự kiện
 };
 
 // ☑️ Xử lý click vào checkbox riêng lẻ
@@ -159,13 +166,16 @@ const toggleSelectAll = () => {
 // - Nếu đã chọn: bỏ chọn
 // - Nếu chưa chọn: thêm vào danh sách chọn
 const toggleSelect = (id: number) => {
-  const index = selectedOrders.value.indexOf(id);
+  const currentSelected = props.selectedOrders || [];
+  const index = currentSelected.indexOf(id);
+  
+  let newSelected: number[];
   if (index > -1) {
-    selectedOrders.value.splice(index, 1);  // Bỏ chọn
+    newSelected = currentSelected.filter((_, i) => i !== index);  // Bỏ chọn
   } else {
-    selectedOrders.value.push(id);           // Thêm vào danh sách chọn
+    newSelected = [...currentSelected, id];  // Thêm vào danh sách chọn
   }
-  emit('update:selectedOrders', selectedOrders.value);  // Phát sự kiện
+  emit('update:selectedOrders', newSelected);  // Phát sự kiện cập nhật parent
 };
 
 // 🏷️ Chuyển đổi status code thành label tiếng Việt (để hiển thị)

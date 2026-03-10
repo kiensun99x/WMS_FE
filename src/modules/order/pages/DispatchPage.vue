@@ -21,20 +21,31 @@
       <div class="text-amber-900">
         <span class="font-semibold">{{ selectedOrders.length }} đơn hàng</span> được chọn
       </div>
-      <button
+      <div class="flex gap-2">
+        <button
         :disabled="selectedOrders.length === 0"
         @click="handleDispatch"
         class="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
       >
         <span>📦</span>
-        <span>Xác nhận điều phối ({{ selectedOrders.length }}/{{ orders.length }})</span>
+        <span>Xác nhận điều phối</span>
       </button>
+      <button
+        :disabled="selectedOrders.length === 0"
+        @click="clearSelected"
+        class="flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
+      >
+        <span>x</span>
+        <span>Hủy bỏ</span>
+      </button>
+      </div>
     </div>
 
     <!-- Orders Table -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <OrderTable
         :orders="orders"
+        :selectedOrders="selectedOrders"
         :showCheckbox="true"
         :showStatus="false"
         :showWarehouse="false"
@@ -152,7 +163,7 @@ const loadOrders = async (page: number = 0) => {
 // - Reset về trang 1
 const handleSearch = (searchFilters: SearchOrderRequest) => {
   filters.value = searchFilters;      // Lưu filters
-  selectedOrders.value = [];          // Clear lựa chọn
+  clearSelected();
   loadOrders(0);                      // Load trang 1 (0-indexed)
 };
 
@@ -167,7 +178,7 @@ const handleReset = () => {
     receiverPhone: '',
     statusCode: 0,  // Keep statusCode = 0 (only NEW orders)
   };
-  selectedOrders.value = [];  // Clear lựa chọn
+  clearSelected();
   loadOrders(0);
 };
 
@@ -175,7 +186,6 @@ const handleReset = () => {
 // - Clear lựa chọn (vì dữ liệu trang mới khác)
 // - Chuyển sang trang (page là 1-indexed, API cần 0-indexed)
 const handlePageChange = (page: number) => {
-  selectedOrders.value = [];  // Clear lựa chọn
   loadOrders(page - 1);       // Trừ 1 để convert sang 0-indexed
 };
 
@@ -189,6 +199,12 @@ const handleDispatch = () => {
   // TODO: Implement dispatch functionality
   console.log('Dispatching orders:', selectedOrders.value);
   alert(`Xác nhận điều phối cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
+  clearSelected();
+};
+
+// Hủy bỏ tất cả lựa chọn đã chọn
+const clearSelected = () => {
+  selectedOrders.value = [];
 };
 
 // ⚙️ LIFECYCLE: Khi component được mount (trang load lần đầu)
