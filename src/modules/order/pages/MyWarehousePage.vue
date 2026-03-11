@@ -217,23 +217,20 @@ const handleExportLabels = async () => {
     }
     if (confirm(`Bạn có chắc muốn xuất nhãn giao hàng cho ${selectedOrders.value.length} đơn hàng đã chọn?`)) {
         try {
-            // Lấy danh sách order codes từ selectedOrders IDs
-            const orderCodes = orders.value
-                .filter(o => selectedOrders.value.includes(o.id))
-                .map(o => o.code);
             
             // Gọi API export labels
-            const response = await exportLabels(orderCodes);
+            const response = await exportLabels(selectedOrders.value);
             
             // Tạo blob URL để download file
             const blob = response.data;
+            //tạo url từ blob để download
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             
             // Lấy filename từ Content-Disposition header nếu có
             const contentDisposition = response.headers['content-disposition'];
-            let filename = `Labels_${new Date().toISOString().split('T')[0]}.xlsx`;
+            let filename = `Labels_${new Date().toISOString().split('T')[0]}.xlsx`; // Default filename
             
             if (contentDisposition && contentDisposition.includes('filename')) {
                 const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+?)(?:;|$)/);
@@ -241,8 +238,9 @@ const handleExportLabels = async () => {
                     filename = decodeURIComponent(filenameMatch[1]);
                 }
             }
-            
+            //set file name
             link.setAttribute('download', filename);
+            //trigger click để download
             document.body.appendChild(link);
             link.click();
             

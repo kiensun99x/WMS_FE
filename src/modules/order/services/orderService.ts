@@ -69,12 +69,12 @@ export const fetchOrders = (filters: SearchOrderRequest, page: number = 0, size:
  * @param orderCodes - Array of order codes
  * @returns Promise with blob data (file content)
  */
-export const exportLabels = (orderCodes: string[]) => {
+export const exportLabels = (orderIds: number[]) => {
   return http.post<Blob>(
     '/orders/labels/',
-    { orderCodes },
+    { orderIds },
     {
-      responseType: 'blob',
+      responseType: 'blob',  //blob để parse dữ liệu nhị phân, nếu không axios sẽ cố parse thành JSON và lỗi
       headers: {
         'Content-Type': 'application/json'
       }

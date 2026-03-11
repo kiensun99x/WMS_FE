@@ -157,8 +157,6 @@ const loadWarehouses = async () => {
   try {
     const list = await getWarehouses() || []
     warehouses.value = list
-    console.log(warehouses.value);
-    
   } catch (err) {
     console.error("Load warehouse failed", err)
   }
