@@ -9,6 +9,8 @@ export interface LoginResult {
   username: string
   fullName: string
   warehouseId: number
+  warehouseCode: string
+  warehouseName: string
   accessToken: string
   authenticated: boolean
 }
