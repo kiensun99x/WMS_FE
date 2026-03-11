@@ -31,6 +31,32 @@ export interface OrderPageResponse {
   }
 }
 
+export interface OrderHistoryItem {
+  userId: number
+  failureReasonId: number | null
+  actorType: string
+  occurredAt: string
+  fromStatus: Order['status']
+  toStatus: Order['status']
+}
+
+export interface OrderHistoryResponse {
+  orderId: number
+  histories: OrderHistoryItem[]
+}
+
+export const getOrderHistories = (orderId: number) => {
+  return http.get<ApiResponse<OrderHistoryResponse>>(
+    `/orders/${orderId}/histories`
+  )
+}
+
+
+
+export const getOrderHistoriesSafe = (orderId: number) => {
+  return getOrderHistories(orderId)
+}
+
 export interface SearchOrderRequest {
   orderCode?: string
   supplierPhone?: string

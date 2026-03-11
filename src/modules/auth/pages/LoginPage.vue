@@ -124,7 +124,7 @@ onMounted(loadWarehouses)
  * LOGIN
  */
 const handleLogin = async () => {
-  message.value = ""
+  // keep previous message visible until user refreshes
 
   if (!username.value || !password.value || !warehouseId.value) {
     message.value = "Vui lòng nhập đầy đủ thông tin"
@@ -141,7 +141,7 @@ const handleLogin = async () => {
 
     await authStore.login(payload)
 
-    router.push("/hello")
+    router.push("/orders")
   } catch (err: any) {
     // backend may return { message } in error response
     message.value = err?.message || err?.response?.message || "Đăng nhập thất bại"
