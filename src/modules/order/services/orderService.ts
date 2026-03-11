@@ -65,6 +65,23 @@ export const fetchOrders = (filters: SearchOrderRequest, page: number = 0, size:
 }
 
 /**
+ * Fetch orders from API with pagination
+ * @param page - Page number (0-indexed)
+ * @param size - Items per page
+ * @param filters - Search filters
+ * @returns ApiResponse with orders list and pagination info
+ */
+export const fetchMyWarehouseOrders = (filters: SearchOrderRequest, page: number = 0, size: number = 10) => {
+  return http.get<ApiResponse<OrderPageResponse>>('/orders/my-warehouse', {
+    params: {
+      ...filters,
+      page,
+      size
+    }
+  })
+}
+
+/**
  * Export labels (nhãn giao hàng) for selected orders
  * @param orderCodes - Array of order codes
  * @returns Promise with blob data (file content)

@@ -77,7 +77,7 @@ import { ref, onMounted, computed } from 'vue';
 import OrderTable from '../components/OrderTable.vue';
 import OrderFilterBox from '../components/OrderFilterBox.vue';
 import OrderPagination from '../components/OrderPagination.vue';
-import { fetchOrders, exportLabels, type Order, type SearchOrderRequest } from '../services/orderService';
+import { fetchMyWarehouseOrders, exportLabels, type Order, type SearchOrderRequest } from '../services/orderService';
 import { authStore } from '@/modules/auth/store/authStore';
 import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
 
@@ -139,14 +139,8 @@ const loadOrders = async (page: number = 0) => {
   loading.value = true;  // Bắt đầu loading
   
   try {
-    // Tạo request object với thêm warehouseId
-    const requestFilters = {
-      ...filters.value,
-      warehouseId: authStore.warehouseId  // Thêm warehouseId bắt buộc
-    };
-
     // Gửi API
-    const response = await fetchOrders(requestFilters as any, page, 10);
+    const response = await fetchMyWarehouseOrders(filters.value, page, 10);
     const data = response.data;
     
     // Cập nhật state nếu thành công
