@@ -16,11 +16,29 @@ const axiosInstance: AxiosInstance = axios.create({
  */
 axiosInstance.interceptors.request.use(
   (config) => {
-
     const token = localStorage.getItem("accessToken")
 
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (token) {
+      // if the stored JWT is already past its exp claim, bail out early
+      const parts = token.split('.')
+      if (parts.length === 3 && parts[1]) {
+        try {
+          const payload = JSON.parse(window.atob(parts[1])) as { exp?: number }
+          if (payload.exp && Date.now() / 1000 > payload.exp) {
+            localStorage.removeItem("accessToken")
+            window.alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
+            window.location.href = "/login"
+            // abort the request by throwing; axios will treat it as an error
+            throw new Error("token expired")
+          }
+        } catch (e) {
+          // silently ignore malformed token
+        }
+      }
+
+      if (config.headers) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
 
     return config
@@ -39,12 +57,18 @@ axiosInstance.interceptors.response.use(
     return response
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // token expired or unauthorized; clear and notify user
+    const status = error.response?.status
+    const msg: string = error.response?.data?.message || ""
+
+    const authFault =
+      status === 401 ||
+      status === 403 ||
+      /expir/i.test(msg) ||
+      /token/i.test(msg)
+
+    if (authFault) {
       localStorage.removeItem("accessToken")
       try {
-        // standard alert is simple and guaranteed to block until user
-        // acknowledges, then we navigate back to login.
         window.alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
       } catch (e) {
         /* ignore if alert not available */

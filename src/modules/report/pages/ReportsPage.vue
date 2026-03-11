@@ -1,18 +1,9 @@
 <template>
-  <div class="report-page p-8">
-
-    <!-- Title -->
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">
-        Cấu hình Xuất báo cáo
-      </h1>
-      <p class="text-gray-500 text-sm">
-        Thiết lập tham số và theo dõi lịch sử kết xuất dữ liệu thống kê.
-      </p>
-    </div>
-
+  <div class="bg-gray-50 min-h-screen py-8">
+  <div class="max-w-[1180px] mx-auto space-y-6">
+    
     <!-- Card -->
-    <div class="bg-white rounded-xl shadow-sm border p-6">
+    <div class="bg-white rounded-xl shadow border border-[#F0F3F4] p-6">
 
       <!-- Tabs -->
       <div class="flex gap-8 border-b mb-6">
@@ -38,10 +29,10 @@
       </div>
 
       <!-- Content -->
-      <div class="grid grid-cols-2 gap-10">
+      <div class="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-12">
 
         <!-- LEFT -->
-        <div>
+        <div class="md:pr-6">
 
           <div class="flex justify-between mb-2">
             <div class="font-semibold text-gray-700">
@@ -54,19 +45,19 @@
           </div>
 
           <div
-            class="border rounded-lg p-4 max-h-[240px] overflow-y-auto space-y-3 bg-gray-50"
+            class="border border-[#DCE3E6] rounded-lg p-4 max-h-[320px] overflow-y-auto space-y-3 bg-[#F9FAFB]"
           >
             <label
               v-for="w in warehouses"
               :key="w.id"
-              class="flex items-center gap-3 text-gray-700"
+              class="flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-2 py-1 rounded"
             >
               <input
                 type="checkbox"
-                class="w-4 h-4"
                 :value="w.id"
                 v-model="selectedIds"
                 :disabled="!selectedIds.includes(w.id) && selectedIds.length >= 10"
+                class="appearance-none w-4 h-4 rounded-full border border-gray-400 transition checked:bg-blue-600 checked:border-blue-600 focus:outline-none"
               />
 
               <span>
@@ -92,6 +83,7 @@
                   type="radio"
                   value="DAY"
                   v-model="reportType"
+                  class="appearance-none h-4 w-4 border border-gray-400 rounded-full checked:bg-blue-600 checked:border-blue-600 focus:outline-none"
                 />
                 <span>Theo ngày (Max 15 ngày)</span>
               </label>
@@ -101,6 +93,7 @@
                   type="radio"
                   value="MONTH"
                   v-model="reportType"
+                  class="appearance-none h-4 w-4 border border-gray-400 rounded-full checked:bg-blue-600 checked:border-blue-600 focus:outline-none"
                 />
                 <span>Theo tháng (Max 12 tháng)</span>
               </label>
@@ -118,16 +111,32 @@
             <div v-if="reportType === 'DAY'" class="space-y-2">
 
               <div
-                class="border rounded-lg px-4 py-3 flex items-center gap-3"
-                :class="errorMessage ? 'border-red-400' : 'border-gray-300'"
+                class="relative border rounded-lg px-4 py-3 flex items-center gap-3"
+                :class="errorMessage ? 'border-red-400' : 'border-[#DCE3E6]'"
               >
+                <!-- calendar icon -->
+                <svg
+                  class="w-5 h-5 text-gray-400 absolute left-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+
                 <input
                   type="date"
                   v-model="startDate"
-                  class="outline-none"
+                  class="outline-none pl-8"
                 />
 
-                <span>-</span>
+                <span class="text-gray-400">-</span>
 
                 <input
                   type="date"
@@ -143,7 +152,7 @@
 
               <div
                 class="border rounded-lg px-4 py-3 flex items-center gap-3"
-                :class="errorMessage ? 'border-red-400' : 'border-gray-300'"
+                :class="errorMessage ? 'border-red-400' : 'border-[#DCE3E6]'"
               >
                 <input
                   type="month"
@@ -165,10 +174,10 @@
             <!-- Error -->
             <div
               v-if="errorMessage"
-              class="text-red-500 text-sm flex items-center gap-2 mt-2"
+              class="text-red-500 text-sm flex items-start gap-2 mt-2"
             >
-              <span class="text-red-500">●</span>
-              {{ errorMessage }}
+              <span class="material-icons text-red-500 text-[18px]">error</span>
+              <span>{{ errorMessage }}</span>
             </div>
           </div>
 
@@ -177,19 +186,18 @@
       </div>
 
       <!-- Button -->
-      <div class="flex justify-end mt-8">
+      <div class="flex justify-end mt-8 border-t border-gray-200 pt-6">
         <button
           @click="generateReport"
           class="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold px-6 py-3 rounded-lg shadow flex items-center gap-2 transition"
         >
-          ⬇
           Xuất báo cáo Excel
         </button>
       </div>
 
     </div>
-
   </div>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -285,7 +293,6 @@ function downloadFile(data: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-// we no longer rely on server-supplied filename; construct our own
 function buildFilename(): string {
   const now = new Date()
   const pad = (n: number) => n.toString().padStart(2, '0')

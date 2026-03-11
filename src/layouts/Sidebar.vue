@@ -62,7 +62,7 @@ const menu = [
   // { path: '/dashboard', label: 'Dashboard', name: 'Dashboard' },
   { path: '/orders', label: 'Đơn hàng', name: 'Orders' },
   { path: '/orders/create', label: 'Tạo đơn hàng', name: 'CreateOrder' },
-  { path: '/warehouse', label: 'Kho hàng của tôi', name: 'Warehouse' },
+  { path: '/my-warehouse', label: 'Kho hàng của tôi', name: 'MyWarehouse' },
   { path: '/dispatch', label: 'Điều phối đơn', name: 'Dispatch' },
   { path: '/reports', label: 'Báo cáo', name: 'Reports' },
 ];
