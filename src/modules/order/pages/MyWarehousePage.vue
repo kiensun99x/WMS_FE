@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Kho hàng của tôi</h1>
-      <p class="text-gray-600">Quản lý hàng trong kho - Warehouse: {{ warehouseInfo }}</p>
+      <p class="text-gray-600">Quản lý hàng trong kho</p>
     </div>
 
     <!-- Filter Box -->
@@ -78,8 +78,6 @@ import OrderTable from '../components/OrderTable.vue';
 import OrderFilterBox from '../components/OrderFilterBox.vue';
 import OrderPagination from '../components/OrderPagination.vue';
 import { fetchMyWarehouseOrders, exportLabels, type Order, type SearchOrderRequest } from '../services/orderService';
-import { authStore } from '@/modules/auth/store/authStore';
-import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
 
 const MAX_EXPORT = 10;  // Giới hạn số đơn hàng được chọn để xuất nhãn cùng lúc
 // ===== STATE =====
@@ -97,9 +95,6 @@ const pageInfo = ref({
   totalPages: 0       // Tổng số trang
 });
 
-// Danh sách các kho hàng (dùng để hiện thị thông tin kho hiện tại)
-const warehouses = ref<Warehouse[]>([]);
-
 // Loading state cho API call
 const loading = ref(false);
 
@@ -110,15 +105,6 @@ const filters = ref<SearchOrderRequest>({
   supplierPhone: '',    // SĐT nhà cung cấp
   receiverPhone: '',    // SĐT người nhận
   statusCode: undefined,  // Trạng thái (0-4)
-});
-
-// ===== COMPUTED =====
-// Hiển thị thông tin kho hiện tại
-// VD: "KHO-01 - Kho Hà Nội" hoặc "N/A" nếu không có kho
-const warehouseInfo = computed(() => {
-  if (!authStore.warehouseId) return 'N/A';  // Nếu không login -> N/A
-  const warehouse = warehouses.value.find(w => w.id === authStore.warehouseId);
-  return warehouse ? `${warehouse.code} - ${warehouse.name}` : 'N/A';
 });
 
 // Tính số thứ tự item đầu tiên trên trang hiện tại
@@ -152,16 +138,6 @@ const loadOrders = async (page: number = 0) => {
     console.error('Load orders failed:', error);
   } finally {
     loading.value = false;  // Stop loading dù success hay fail
-  }
-};
-
-// 🏗️ Load danh sách các kho hàng (dùng hiển thị thông tin kho)
-const loadWarehouses = async () => {
-  try {
-    const list = await getWarehouses();  // Gửi API get warehouses
-    warehouses.value = list || [];
-  } catch (error) {
-    console.error('Load warehouses failed:', error);
   }
 };
 
