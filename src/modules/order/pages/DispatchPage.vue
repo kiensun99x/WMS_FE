@@ -127,7 +127,7 @@ import { ref, onMounted, computed } from 'vue';
 import OrderTable from '../../order/components/OrderTable.vue';
 import OrderFilterBox from '../../order/components/OrderFilterBox.vue';
 import OrderPagination from '../../order/components/OrderPagination.vue';
-import { fetchOrders, type Order, type SearchOrderRequest } from '../../order/services/orderService';
+import { fetchOrders, dispatchOrders, type Order, type SearchOrderRequest } from '../../order/services/orderService';
 import { getWarehouses, type WarehouseBrief } from '../../auth/services/warehouseService';
 
 const MAX_DISPATCH = 100;  // Giới hạn số đơn hàng được chọn để điều phối cùng lúc
@@ -247,7 +247,7 @@ const handlePageChange = (page: number) => {
 };
 
 // 📦 Xử lý khi user click "Xác nhận điều phối"
-const handleDispatch = () => {
+const handleDispatch = async () => {
   // Check: có chọn đơn hàng không?
   if (selectedOrders.value.length === 0) {
     alert('Vui lòng chọn ít nhất một đơn hàng');
@@ -266,11 +266,26 @@ const handleDispatch = () => {
   }
   
   if (confirm(`Bạn có chắc muốn điều phối ${selectedOrders.value.length} đơn hàng đã chọn vào kho được chọn?`)) {
-    // TODO: Implement dispatch functionality
-    console.log('Dispatching orders:', selectedOrders.value, 'to warehouse:', selectedWarehouse.value);
-    alert(`Xác nhận điều phối cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
-    clearSelected();
-    selectedWarehouse.value = '';
+    loading.value = true;
+    
+    try {
+      const response = await dispatchOrders(selectedOrders.value, selectedWarehouse.value as number);
+      const data = response.data;
+      if (data?.message) {
+        alert(`${data?.message} ${selectedOrders.value.length} đơn hàng`);
+        clearSelected();
+        selectedWarehouse.value = '';
+        // Reload orders list to reflect changes
+        loadOrders(0);
+      } else {
+        alert('Điều phối đơn hàng không thành công. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Dispatch failed:', error);
+      alert('Lỗi khi điều phối đơn hàng. Vui lòng thử lại.');
+    } finally {
+      loading.value = false;
+    }
   }
 };
 

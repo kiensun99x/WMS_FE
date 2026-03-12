@@ -124,3 +124,16 @@ export const exportLabels = (orderIds: number[]) => {
     }
   )
 }
+
+/**
+ * Dispatch orders to a warehouse
+ * @param orderIds - Array of order IDs to dispatch
+ * @param warehouseId - Target warehouse ID
+ * @returns Api response with dispatch result
+ */
+export const dispatchOrders = (orderIds: number[], warehouseId: number) => {
+  return http.post<ApiResponse<any>>('/batch/dispatch/manual', {
+    orderIds,
+    warehouseId
+  })
+}
