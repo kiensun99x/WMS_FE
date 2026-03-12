@@ -1,11 +1,5 @@
 <template>
   <div class="p-8">
-    <!-- Header -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Kho hàng của tôi</h1>
-      <p class="text-gray-600">Quản lý hàng trong kho</p>
-    </div>
-
     <!-- Filter Box -->
     <div class="mb-6">
       <OrderFilterBox 

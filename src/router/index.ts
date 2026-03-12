@@ -16,19 +16,6 @@ const routes: Array<RouteRecordRaw> = [
   
   ...authRoutes,
   ...orderRoutes,
-
-  {
-    path: '/warehouse',
-    name: 'Warehouse',
-    component: WarehousePage,
-    meta: { title: 'Kho hàng của tôi', subtitle: 'Quản lý hàng trong  kho' },
-  },
-  {
-    path: '/dispatch',
-    name: 'Dispatch',
-    component: DispatchPage,
-    meta: { title: 'Điều phối đơn', subtitle: 'Phân phối và điều phối đơn hàng' },
-  },
   ...reportRoutes,
   {
     path: '/',
