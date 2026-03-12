@@ -35,6 +35,6 @@ export const orderRoutes: RouteRecordRaw[] = [
     path: '/dispatch',
     name: 'Dispatch',
     component: DispatchPage,
-    meta: { title: 'Điều phối đơn', subtitle: 'Phân phối và điều phối đơn hàng' },
+    meta: { title: 'Danh sách các đơn hàng ', subtitle: 'Phân phối và điều phối đơn hàng mới đến kho chỉ định' },
   }
 ]
