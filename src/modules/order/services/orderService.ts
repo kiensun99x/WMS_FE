@@ -24,6 +24,19 @@ export interface SearchOrderRequest {
   warehouseCode?: string
 }
 
+export interface CreateOrderRequest {
+  supplierName: string
+  supplierAddress: string
+  supplierPhone: string
+  supplierEmail: string
+  receiverName: string
+  receiverAddress: string
+  receiverPhone: string
+  receiverEmail: string
+  receiverLat: number
+  receiverLon: number
+}
+
 /**
  * Get single order by ID
  * @param id - Order ID
@@ -95,4 +108,13 @@ export const dispatchOrders = (orderIds: number[], warehouseId: number) => {
     orderIds,
     warehouseId
   })
+}
+
+/**
+ * Create a new order
+ * @param orderData - Order creation data
+ * @returns ApiResponse with created order details
+ */
+export const createOrder = (orderData: CreateOrderRequest) => {
+  return http.post<ApiResponse<Order>>('/orders/', orderData)
 }

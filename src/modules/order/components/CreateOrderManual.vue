@@ -34,6 +34,7 @@
             <input
               v-model="form.supplierPhone"
               type="tel"
+                pattern="[0-9]{10,11}"
               placeholder="09xxxxxxxx"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -88,7 +89,7 @@
           />
           <p class="text-right text-xs text-gray-500 mt-1">{{ form.receiverName.length }}/50</p>
         </div>
-        
+
         <!-- Receiver Phone & Email -->
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -98,6 +99,7 @@
             <input
               v-model="form.receiverPhone"
               type="tel"
+                pattern="[0-9]{10,11}"
               placeholder="09xxxxxxxx"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -166,16 +168,18 @@
     <div class="flex gap-3 justify-center py-6 border-t border-gray-200">
       <button
         type="button"
-        class="px-6 py-2 border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition"
+        :disabled="isLoading"
+        class="px-6 py-2 border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 transition"
       >
         Hủy bỏ
       </button>
       <button
         type="button"
         @click="handleSubmit"
-        class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition"
+        :disabled="isLoading"
+        class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
       >
-        Tạo đơn hàng
+        {{ isLoading ? 'Đang tạo...' : 'Tạo đơn hàng' }}
       </button>
     </div>
   </div>
@@ -183,6 +187,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { createOrder } from '../../order/services/orderService'
 
 const form = ref({
   supplierName: '',
@@ -197,7 +202,9 @@ const form = ref({
   receiverLongitude: ''
 })
 
-const handleSubmit = () => {
+const isLoading = ref(false)
+
+const handleSubmit = async () => {
   // Validation
   const requiredFields = [
     'supplierName',
@@ -207,7 +214,9 @@ const handleSubmit = () => {
     'receiverName',
     'receiverAddress',
     'receiverPhone',
-    'receiverEmail'
+    'receiverEmail',
+    'receiverLatitude',
+    'receiverLongitude'
   ]
 
   const emptyFields = requiredFields.filter(field => !form.value[field as keyof typeof form.value])
@@ -217,7 +226,64 @@ const handleSubmit = () => {
     return
   }
 
-  console.log('Tạo đơn hàng:', form.value)
-  alert('Tạo đơn hàng thành công (chức năng sắp được cập nhật)')
+  // Validate GPS coordinates
+  const lat = parseFloat(String(form.value.receiverLatitude))
+  const lon = parseFloat(String(form.value.receiverLongitude))
+
+  if (isNaN(lat) || lat < -90 || lat > 90) {
+    alert('Vĩ độ phải nằm trong khoảng -90 đến 90')
+    return
+  }
+
+  if (isNaN(lon) || lon < -180 || lon > 180) {
+    alert('Kinh độ phải nằm trong khoảng -180 đến 180')
+    return
+  }
+
+  isLoading.value = true
+
+  try {
+    const response = await createOrder({
+      supplierName: form.value.supplierName,
+      supplierAddress: form.value.supplierAddress,
+      supplierPhone: form.value.supplierPhone,
+      supplierEmail: form.value.supplierEmail,
+      receiverName: form.value.receiverName,
+      receiverAddress: form.value.receiverAddress,
+      receiverPhone: form.value.receiverPhone,
+      receiverEmail: form.value.receiverEmail,
+      receiverLat: lat,
+      receiverLon: lon
+    })
+
+    const data = (response as any).data
+
+    if (data?.result) {
+      alert(`Tạo đơn hàng thành công. Mã đơn: ${data.result.code}`)
+      // Reset form
+      form.value = {
+        supplierName: '',
+        supplierAddress: '',
+        supplierPhone: '',
+        supplierEmail: '',
+        receiverName: '',
+        receiverAddress: '',
+        receiverPhone: '',
+        receiverEmail: '',
+        receiverLatitude: '',
+        receiverLongitude: ''
+      }
+      // TODO: Redirect to order detail page or orders list
+      console.log('Order created:', data.result)
+    } else {
+      alert(data?.message || 'Tạo đơn hàng không thành công. Vui lòng thử lại.')
+    }
+  } catch (error: any) {
+    console.error('Create order failed:', error)
+    const errorMessage = error?.message || 'Lỗi khi tạo đơn hàng. Vui lòng thử lại.'
+    alert(errorMessage)
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
