@@ -1,5 +1,5 @@
 import http from "@/services/http"
-import type { ApiResponse } from "../type/auth"
+import type { ApiResponse } from "../../modules/auth/type/auth"
 
 export interface WarehouseBrief {
   id: number

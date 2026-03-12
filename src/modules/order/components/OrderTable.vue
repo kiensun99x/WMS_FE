@@ -104,7 +104,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { type Order } from '../services/orderService';
+import { type Order } from '../type/order/Order';
 
 // ===== PROPS =====
 // orders: Danh sách đơn hàng cần hiển thị

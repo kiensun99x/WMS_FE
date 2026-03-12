@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentWarehouse } from '@/modules/auth/services/warehouseService';
+import { getCurrentWarehouse } from '@/shared/services/warehouseService';
 import { computed, ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 

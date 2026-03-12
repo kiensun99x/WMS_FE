@@ -127,8 +127,9 @@ import { ref, onMounted, computed } from 'vue';
 import OrderTable from '../../order/components/OrderTable.vue';
 import OrderFilterBox from '../../order/components/OrderFilterBox.vue';
 import OrderPagination from '../../order/components/OrderPagination.vue';
-import { fetchOrders, dispatchOrders, type Order, type SearchOrderRequest } from '../../order/services/orderService';
-import { getWarehouses, type WarehouseBrief } from '../../auth/services/warehouseService';
+import { fetchOrders, dispatchOrders, type SearchOrderRequest } from '../../order/services/orderService';
+import { type Order } from '../type/order/Order';
+import { getWarehouses, type WarehouseBrief } from '../../../shared/services/warehouseService';
 
 const MAX_DISPATCH = 100;  // Giới hạn số đơn hàng được chọn để điều phối cùng lúc
 // ===== STATE =====

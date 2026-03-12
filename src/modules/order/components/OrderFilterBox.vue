@@ -96,7 +96,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import type { SearchOrderRequest } from '../services/orderService';
-import { type WarehouseBrief, getWarehouses } from '@/modules/auth/services/warehouseService';
+import { type WarehouseBrief, getWarehouses } from '@/shared/services/warehouseService';
 
 // ===== PROPS =====
 // hideWarehouse: Ẩn filter "Mã kho hàng" (khi không cần)

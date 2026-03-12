@@ -88,7 +88,7 @@
 
 import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
-import { getWarehouses } from "../services/warehouseService"
+import { getWarehouses } from "../../../shared/services/warehouseService"
 import { authStore } from "../store/authStore"
 import type { LoginRequest } from "../type/auth"
 

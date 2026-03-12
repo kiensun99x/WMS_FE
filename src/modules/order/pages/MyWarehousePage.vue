@@ -71,7 +71,8 @@ import { ref, onMounted, computed } from 'vue';
 import OrderTable from '../components/OrderTable.vue';
 import OrderFilterBox from '../components/OrderFilterBox.vue';
 import OrderPagination from '../components/OrderPagination.vue';
-import { fetchMyWarehouseOrders, exportLabels, type Order, type SearchOrderRequest } from '../services/orderService';
+import { fetchMyWarehouseOrders, exportLabels, type SearchOrderRequest } from '../services/orderService';
+import { type Order } from '../type/order/Order';
 
 const MAX_EXPORT = 10;  // Giới hạn số đơn hàng được chọn để xuất nhãn cùng lúc
 // ===== STATE =====

@@ -202,8 +202,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { getWarehouses } from '@/modules/auth/services/warehouseService'
-import type { WarehouseBrief } from '@/modules/auth/services/warehouseService'
+import { getWarehouses } from '@/shared/services/warehouseService'
+import type { WarehouseBrief } from '@/shared/services/warehouseService'
 import type {
   WarehouseOrderStatisticRequest,
   DeliveryPerformanceRequest,
