@@ -172,10 +172,10 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   getOrderById,
-  type Order,
   getOrderHistories,
-  type OrderHistoryItem,
 } from '../services/orderService'
+import { type OrderHistoryItem } from '../type/history/OrderHistoryItem'
+import { type Order } from '../type/order/Order'
 
 // lấy id từ route params (router đã khai báo props:true)
 const route = useRoute()

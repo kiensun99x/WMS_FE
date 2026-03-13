@@ -1,11 +1,5 @@
 <template>
   <div class="p-8">
-    <!-- Header -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Kho hàng của tôi</h1>
-      <p class="text-gray-600">Quản lý hàng trong kho - Warehouse: {{ warehouseInfo }}</p>
-    </div>
-
     <!-- Filter Box -->
     <div class="mb-6">
       <OrderFilterBox 
@@ -25,7 +19,7 @@
         <button
             :disabled="selectedOrders.length === 0"
             @click="handleExportLabels"
-            class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
+            class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
         >
             <span>📄</span>
             <span>Xuất nhãn giao hàng ({{ selectedOrders.length }}/{{ orders.length }})</span>
@@ -33,7 +27,7 @@
         <button
         :disabled="selectedOrders.length === 0"
         @click="clearSelected"
-        class="flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
+        class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
       >
         <span>x</span>
         <span>Hủy bỏ</span>
@@ -77,9 +71,8 @@ import { ref, onMounted, computed } from 'vue';
 import OrderTable from '../components/OrderTable.vue';
 import OrderFilterBox from '../components/OrderFilterBox.vue';
 import OrderPagination from '../components/OrderPagination.vue';
-import { fetchOrders, exportLabels, type Order, type SearchOrderRequest } from '../services/orderService';
-import { authStore } from '@/modules/auth/store/authStore';
-import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
+import { fetchMyWarehouseOrders, exportLabels, type SearchOrderRequest } from '../services/orderService';
+import { type Order } from '../type/order/Order';
 
 const MAX_EXPORT = 10;  // Giới hạn số đơn hàng được chọn để xuất nhãn cùng lúc
 // ===== STATE =====
@@ -97,9 +90,6 @@ const pageInfo = ref({
   totalPages: 0       // Tổng số trang
 });
 
-// Danh sách các kho hàng (dùng để hiện thị thông tin kho hiện tại)
-const warehouses = ref<Warehouse[]>([]);
-
 // Loading state cho API call
 const loading = ref(false);
 
@@ -110,15 +100,6 @@ const filters = ref<SearchOrderRequest>({
   supplierPhone: '',    // SĐT nhà cung cấp
   receiverPhone: '',    // SĐT người nhận
   statusCode: undefined,  // Trạng thái (0-4)
-});
-
-// ===== COMPUTED =====
-// Hiển thị thông tin kho hiện tại
-// VD: "KHO-01 - Kho Hà Nội" hoặc "N/A" nếu không có kho
-const warehouseInfo = computed(() => {
-  if (!authStore.warehouseId) return 'N/A';  // Nếu không login -> N/A
-  const warehouse = warehouses.value.find(w => w.id === authStore.warehouseId);
-  return warehouse ? `${warehouse.code} - ${warehouse.name}` : 'N/A';
 });
 
 // Tính số thứ tự item đầu tiên trên trang hiện tại
@@ -139,14 +120,8 @@ const loadOrders = async (page: number = 0) => {
   loading.value = true;  // Bắt đầu loading
   
   try {
-    // Tạo request object với thêm warehouseId
-    const requestFilters = {
-      ...filters.value,
-      warehouseId: authStore.warehouseId  // Thêm warehouseId bắt buộc
-    };
-
     // Gửi API
-    const response = await fetchOrders(requestFilters as any, page, 10);
+    const response = await fetchMyWarehouseOrders(filters.value, page, 10);
     const data = response.data;
     
     // Cập nhật state nếu thành công
@@ -158,16 +133,6 @@ const loadOrders = async (page: number = 0) => {
     console.error('Load orders failed:', error);
   } finally {
     loading.value = false;  // Stop loading dù success hay fail
-  }
-};
-
-// 🏗️ Load danh sách các kho hàng (dùng hiển thị thông tin kho)
-const loadWarehouses = async () => {
-  try {
-    const list = await getWarehouses();  // Gửi API get warehouses
-    warehouses.value = list || [];
-  } catch (error) {
-    console.error('Load warehouses failed:', error);
   }
 };
 
@@ -217,23 +182,20 @@ const handleExportLabels = async () => {
     }
     if (confirm(`Bạn có chắc muốn xuất nhãn giao hàng cho ${selectedOrders.value.length} đơn hàng đã chọn?`)) {
         try {
-            // Lấy danh sách order codes từ selectedOrders IDs
-            const orderCodes = orders.value
-                .filter(o => selectedOrders.value.includes(o.id))
-                .map(o => o.code);
             
             // Gọi API export labels
-            const response = await exportLabels(orderCodes);
+            const response = await exportLabels(selectedOrders.value);
             
             // Tạo blob URL để download file
             const blob = response.data;
+            //tạo url từ blob để download
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             
             // Lấy filename từ Content-Disposition header nếu có
             const contentDisposition = response.headers['content-disposition'];
-            let filename = `Labels_${new Date().toISOString().split('T')[0]}.xlsx`;
+            let filename = `Labels_${new Date().toISOString().split('T')[0]}.xlsx`; // Default filename
             
             if (contentDisposition && contentDisposition.includes('filename')) {
                 const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+?)(?:;|$)/);
@@ -241,8 +203,9 @@ const handleExportLabels = async () => {
                     filename = decodeURIComponent(filenameMatch[1]);
                 }
             }
-            
+            //set file name
             link.setAttribute('download', filename);
+            //trigger click để download
             document.body.appendChild(link);
             link.click();
             
@@ -268,7 +231,6 @@ const clearSelected = () => {
 // - Load danh sách kho hàng thước
 // - Rồi load danh sách đơn hàng của kho hiện tại
 onMounted(async () => {
-  await loadWarehouses();  // Load kho trước (cần cho warehouseInfo)
   loadOrders(0);           // Rồi load đơn hàng trang 1
 });
 </script>

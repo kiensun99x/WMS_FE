@@ -29,7 +29,8 @@ import { ref, computed, onMounted } from 'vue';
 import OrderFilterBox from '../components/OrderFilterBox.vue';
 import OrderTable from '../components/OrderTable.vue';
 import OrderPagination from '../components/OrderPagination.vue';
-import { fetchOrders, type Order, type SearchOrderRequest } from '../services/orderService';
+import { fetchOrders, type SearchOrderRequest } from '../services/orderService';
+import { type Order } from '../type/order/Order';
 
 
 // ===== STATE =====

@@ -96,7 +96,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import type { SearchOrderRequest } from '../services/orderService';
-import { type Warehouse, getWarehouses } from '@/modules/auth/services/warehouseService';
+import { type WarehouseBrief, getWarehouses } from '@/shared/services/warehouseService';
 
 // ===== PROPS =====
 // hideWarehouse: Ẩn filter "Mã kho hàng" (khi không cần)
@@ -111,7 +111,7 @@ const props = withDefaults(defineProps<{
 
 // ===== STATE =====
 // Danh sách các kho hàng (dùng cho dropdown warehouse)
-const warehouses = ref<Warehouse[]>([])
+const warehouses = ref<WarehouseBrief[]>([])
 
 // ===== EMIT =====
 // 'search': Phát sự kiện khi user click "Tìm kiếm" với filters đã nhập
@@ -157,8 +157,6 @@ const loadWarehouses = async () => {
   try {
     const list = await getWarehouses() || []
     warehouses.value = list
-    console.log(warehouses.value);
-    
   } catch (err) {
     console.error("Load warehouse failed", err)
   }

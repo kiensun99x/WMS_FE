@@ -202,8 +202,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { getWarehouses } from '@/modules/auth/services/warehouseService'
-import type { Warehouse } from '@/modules/auth/services/warehouseService'
+import { getWarehouses } from '@/shared/services/warehouseService'
+import type { WarehouseBrief } from '@/shared/services/warehouseService'
 import type {
   WarehouseOrderStatisticRequest,
   DeliveryPerformanceRequest,
@@ -217,7 +217,7 @@ import {
 const currentTab = ref<'order' | 'delivery'>('order')
 const reportType = ref<ReportType>('DAY')
 
-const warehouses = ref<Warehouse[]>([])
+const warehouses = ref<WarehouseBrief[]>([])
 const selectedIds = ref<number[]>([])
 
 const startDate = ref('')

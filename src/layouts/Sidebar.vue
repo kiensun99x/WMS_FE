@@ -26,8 +26,8 @@
 
     <!-- User Section -->
     <div class="border-t border-gray-700 p-4">
-      <div class="text-sm font-semibold mb-3">User</div>
-      <div class="text-sm mb-3"> Kho TTT</div>
+      <div class="text-sm font-semibold mb-3">{{ userInfo.fullName }}</div>
+      <div class="text-sm mb-3">{{userInfo.warehouseName}}({{ userInfo.warehouseCode }})</div>
       <div class="flex space-x-2">
         <button class="flex-1 px-3 py-2 text-xs bg-gray-700 hover:bg-gray-600 rounded transition">
           Settings
@@ -50,6 +50,15 @@ import { authStore } from '../modules/auth/store/authStore';
 
 const route = useRoute();
 const router = useRouter();
+
+const userInfo = computed(() => {
+  return {
+    username: authStore.username,
+    fullName: authStore.fullName,
+    warehouseCode: authStore.warehouseCode,
+    warehouseName: authStore.warehouseName,
+  };
+});
 
 const handleLogout = () => {
   // clear store and local storage then navigate back to login

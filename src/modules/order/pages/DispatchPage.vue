@@ -16,71 +16,109 @@
       />
     </div>
 
-    <!-- Selection Info & Dispatch Button -->
-    <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex justify-between items-center">
-      <div class="text-amber-900">
-        <span class="font-semibold">{{ selectedOrders.length }} đơn hàng</span> được chọn
-      </div>
-      <div class="flex gap-2">
-        <button
-        :disabled="selectedOrders.length === 0"
-        @click="handleDispatch"
-        class="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
-      >
-        <span>📦</span>
-        <span>Xác nhận điều phối</span>
-      </button>
-      <button
-        :disabled="selectedOrders.length === 0"
-        @click="clearSelected"
-        class="flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
-      >
-        <span>x</span>
-        <span>Hủy bỏ</span>
-      </button>
-      </div>
-    </div>
-
-    <!-- Orders Table -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <OrderTable
-        :orders="orders"
-        :selectedOrders="selectedOrders"
-        :maxSelect="MAX_DISPATCH"
-        :showCheckbox="true"
-        :showStatus="false"
-        :showWarehouse="false"
-        :showFailedCount="false"
-        @update:selectedOrders="selectedOrders = $event"
-      />
-    </div>
-
-    <!-- Pagination -->
-    <div class="mt-6 flex items-center justify-between">
-      <div class="text-sm text-gray-600">
-        Hiển thị <span class="font-semibold">{{ startItem }}</span> đến
-        <span class="font-semibold">{{ endItem }}</span> trong số
-        <span class="font-semibold">{{ pageInfo.totalElements }}</span> kết quả
-      </div>
-      <OrderPagination
-        :current-page="pageInfo.number + 1"
-        :total-pages="pageInfo.totalPages"
-        @change-page="handlePageChange"
-      />
-    </div>
-
-    <!-- Dispatch Info Section (Optional) -->
-    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <div class="flex items-start gap-3">
-        <span class="text-xl">ℹ️</span>
-        <div>
-          <h3 class="font-semibold text-blue-900 mb-1">Mẹo điều phối</h3>
-          <p class="text-blue-800 text-sm">
-            Bạn có thể chọn cùng lúc nhiều đơn hàng để điều phối vào cùng một kho nhằm tiết kiệm thời gian vận chuyển.
-          </p>
+    <div class="flex gap-3">
+      <!-- Orders List Section -->
+      <div class="flex-1">
+        <!-- Orders Table -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <OrderTable
+          :orders="orders"
+          :selectedOrders="selectedOrders"
+          :maxSelect="MAX_DISPATCH"
+          :showCheckbox="true"
+          :showStatus="false"
+          :showWarehouse="false"
+          :showFailedCount="false"
+          @update:selectedOrders="selectedOrders = $event"
+          />
+        </div>
+        
+        <!-- Pagination -->
+        <div class="mt-6 flex items-center justify-between">
+          <div class="text-sm text-gray-600">
+            Hiển thị <span class="font-semibold">{{ startItem }}</span> đến
+            <span class="font-semibold">{{ endItem }}</span> trong số
+            <span class="font-semibold">{{ pageInfo.totalElements }}</span> kết quả
+          </div>
+          <OrderPagination
+          :current-page="pageInfo.number + 1"
+          :total-pages="pageInfo.totalPages"
+          @change-page="handlePageChange"
+          />
         </div>
       </div>
+      
+      <!-- Dispatch Sidebar -->
+      <div class="w-76 bg-white rounded-lg border border-gray-200 p-6">
+        
+        <!-- Selected Orders Count -->
+        <div class="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
+          <div class="flex gap-4">
+            <span class="text-gray-700 font-medium">Số đơn đã chọn:</span>
+            <span class="text-blue-600 font-bold">{{ selectedOrders.length }} đơn hàng</span>
+          </div>
+        </div>
+        <button
+          :disabled="selectedOrders.length === 0"
+          @click="clearSelected"
+          class="flex items-center gap-2 px-4 py-2 mb-6 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition"
+        >
+          <span>Bỏ chọn</span>
+        </button>
+
+        <!-- Warehouse Selection -->
+        <div class="mb-6">
+          <div class="flex gap-1 mb-2">
+            <label class="text-sm font-bold text-gray-900">Kho hàng đích</label>
+            <span class="text-red-500 font-bold">*</span>
+          </div>
+          
+          <div class="relative">
+            
+            <!-- Select Dropdown -->
+            <select 
+              v-model="selectedWarehouse"
+              class="w-full p-3 border border-gray-300 rounded-lg text-gray-900 bg-white  cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>Chọn kho hàng</option>
+              <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">
+                {{ warehouse.code }}: {{ warehouse.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Confirm Button -->
+        <button
+          :disabled="selectedOrders.length === 0 || !selectedWarehouse"
+          @click="handleDispatch"
+          class="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold rounded-lg flex items-center justify-center gap-2 transition mb-3"
+        >
+          <span>Xác nhận điều phối</span>
+        </button>
+
+        <!-- Note Text -->
+        <p class="text-xs text-gray-600 text-center mb-6 leading-relaxed">
+          Sau khi xác nhận, đơn hàng sẽ chuyển sang trạng thái 
+          <span class="font-bold">"1 - Lưu kho"</span> 
+          và ghi nhận lịch sử xử lý.
+        </p>
+
+        <!-- Dispatch Tips Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+          <span class="text-2xl flex-shrink-0">ℹ️</span>
+          <div>
+            <h3 class="font-bold text-gray-900 text-sm mb-1">Mẹo điều phối</h3>
+            <p class="text-gray-700 text-xs leading-relaxed">
+              Bạn có thể chọn cùng lúc nhiều đơn hàng để điều phối vào cùng một kho nhằm tiết kiệm thời gian vận chuyển.
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
+
+    
   </div>
 </template>
 
@@ -89,7 +127,9 @@ import { ref, onMounted, computed } from 'vue';
 import OrderTable from '../../order/components/OrderTable.vue';
 import OrderFilterBox from '../../order/components/OrderFilterBox.vue';
 import OrderPagination from '../../order/components/OrderPagination.vue';
-import { fetchOrders, type Order, type SearchOrderRequest } from '../../order/services/orderService';
+import { fetchOrders, dispatchOrders, type SearchOrderRequest } from '../../order/services/orderService';
+import { type Order } from '../type/order/Order';
+import { getWarehouses, type WarehouseBrief } from '../../../shared/services/warehouseService';
 
 const MAX_DISPATCH = 100;  // Giới hạn số đơn hàng được chọn để điều phối cùng lúc
 // ===== STATE =====
@@ -98,6 +138,12 @@ const orders = ref<Order[]>([]);
 
 // Danh sách ID đơn hàng được chọn (cho nút "Xác nhận điều phối")
 const selectedOrders = ref<number[]>([]);
+
+// Danh sách kho hàng
+const warehouses = ref<WarehouseBrief[]>([]);
+
+// Kho hàng được chọn để phân phối
+const selectedWarehouse = ref<number | string>('');
 
 // Thông tin phân trang (size, trang hiện tại, tổng, tổng trang)
 const pageInfo = ref({
@@ -159,6 +205,16 @@ const loadOrders = async (page: number = 0) => {
   }
 };
 
+// 📦 Load danh sách kho hàng
+const loadWarehouses = async () => {
+  try {
+    const data = await getWarehouses();
+    warehouses.value = data;
+  } catch (error) {
+    console.error('Load warehouses failed:', error);
+  }
+};
+
 // 🔍 Xử lý khi user click "Tìm kiếm"
 // - Cập nhật filters
 // - Clear lựa chọn (selectedOrders) - vì dữ liệu thay đổi
@@ -192,21 +248,45 @@ const handlePageChange = (page: number) => {
 };
 
 // 📦 Xử lý khi user click "Xác nhận điều phối"
-const handleDispatch = () => {
+const handleDispatch = async () => {
   // Check: có chọn đơn hàng không?
   if (selectedOrders.value.length === 0) {
     alert('Vui lòng chọn ít nhất một đơn hàng');
     return;
   }
+  
+  // Check: có chọn kho không?
+  if (!selectedWarehouse.value) {
+    alert('Vui lòng chọn kho hàng đích');
+    return;
+  }
+  
   if (selectedOrders.value.length > MAX_DISPATCH) {
     alert(`Chỉ có thể chọn tối đa ${MAX_DISPATCH} đơn hàng để điều phối cùng lúc`);
     return;
   }
-  if (confirm(`Bạn có chắc muốn điều phối ${selectedOrders.value.length} đơn hàng đã chọn?`)) {
-    // TODO: Implement dispatch functionality
-    console.log('Dispatching orders:', selectedOrders.value);
-    alert(`Xác nhận điều phối cho ${selectedOrders.value.length} đơn hàng (chức năng sắp được cập nhật)`);
-    clearSelected();
+  
+  if (confirm(`Bạn có chắc muốn điều phối ${selectedOrders.value.length} đơn hàng đã chọn vào kho được chọn?`)) {
+    loading.value = true;
+    
+    try {
+      const response = await dispatchOrders(selectedOrders.value, selectedWarehouse.value as number);
+      const data = response.data;
+      if (data?.message) {
+        alert(`${data?.message} ${selectedOrders.value.length} đơn hàng`);
+        clearSelected();
+        selectedWarehouse.value = '';
+        // Reload orders list to reflect changes
+        loadOrders(0);
+      } else {
+        alert('Điều phối đơn hàng không thành công. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Dispatch failed:', error);
+      alert('Lỗi khi điều phối đơn hàng. Vui lòng thử lại.');
+    } finally {
+      loading.value = false;
+    }
   }
 };
 
@@ -217,7 +297,9 @@ const clearSelected = () => {
 
 // ⚙️ LIFECYCLE: Khi component được mount (trang load lần đầu)
 // - Load danh sách đơn hàng cần điều phối (chỉ mới = NEW)
+// - Load danh sách kho hàng
 onMounted(async () => {
   loadOrders(0);  // Load trang 1 (0-indexed)
+  loadWarehouses();
 });
 </script>
