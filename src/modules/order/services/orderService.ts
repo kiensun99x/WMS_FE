@@ -10,12 +10,6 @@ export const getOrderHistories = (orderId: number) => {
   )
 }
 
-
-
-export const getOrderHistoriesSafe = (orderId: number) => {
-  return getOrderHistories(orderId)
-}
-
 export interface SearchOrderRequest {
   orderCode?: string
   supplierPhone?: string

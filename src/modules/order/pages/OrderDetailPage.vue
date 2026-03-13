@@ -11,27 +11,6 @@
     </div>
 
     <div v-else>
-
-      <!-- HEADER -->
-      <!-- <div class="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">
-            Thông tin đơn hàng: {{ order?.code }}
-          </h1>
-          <p class="text-gray-500 text-sm mt-1">
-            Ngày tạo: {{ formatDate(order?.createdAt || '') }}
-          </p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            In phiếu giao hàng
-          </button>
-          <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-            Xác nhận giao hàng
-          </button>
-        </div>
-      </div> -->
-
       <!-- 3 CARDS -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
 

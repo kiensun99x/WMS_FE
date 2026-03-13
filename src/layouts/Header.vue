@@ -57,8 +57,6 @@ const fetchWarehouse = async () => {
   }
 };
 
-// Fetch khi component mounted
-// onMounted(fetchWarehouse);
 
 // Watch để fetch lại khi route thay đổi
 watch(() => route.name, fetchWarehouse);

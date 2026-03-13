@@ -12,7 +12,7 @@ export interface LoginResult {
   warehouseCode: string
   warehouseName: string
   accessToken: string
-  authenticated: boolean
+  isAuthenticated: boolean
 }
 
 export interface ApiResponse<T> {

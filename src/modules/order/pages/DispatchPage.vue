@@ -130,8 +130,9 @@ import OrderPagination from '../../order/components/OrderPagination.vue';
 import { fetchOrders, dispatchOrders, type SearchOrderRequest } from '../../order/services/orderService';
 import { type Order } from '../type/order/Order';
 import { getWarehouses, type WarehouseBrief } from '../../../shared/services/warehouseService';
+import { MAX_DISPATCH } from '../../../constants/SelectionLimit.ts';
+import type { ErrorResponse } from '@/services/error-Response';
 
-const MAX_DISPATCH = 100;  // Giới hạn số đơn hàng được chọn để điều phối cùng lúc
 // ===== STATE =====
 // Danh sách đơn hàng từ API
 const orders = ref<Order[]>([]);
@@ -272,18 +273,14 @@ const handleDispatch = async () => {
     try {
       const response = await dispatchOrders(selectedOrders.value, selectedWarehouse.value as number);
       const data = response.data;
-      if (data?.message) {
-        alert(`${data?.message} ${selectedOrders.value.length} đơn hàng`);
-        clearSelected();
-        selectedWarehouse.value = '';
-        // Reload orders list to reflect changes
-        loadOrders(0);
-      } else {
-        alert('Điều phối đơn hàng không thành công. Vui lòng thử lại.');
-      }
-    } catch (error) {
+      alert(`${data.message} ${selectedOrders.value.length} đơn hàng`);
+      clearSelected();
+      selectedWarehouse.value = '';
+      // Reload orders list to reflect changes
+      loadOrders(0);
+    } catch (error : ErrorResponse | any) {
       console.error('Dispatch failed:', error);
-      alert('Lỗi khi điều phối đơn hàng. Vui lòng thử lại.');
+      alert(`${error.code}: ${error?.message}` || 'Điều phối thất bại');
     } finally {
       loading.value = false;
     }

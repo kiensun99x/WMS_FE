@@ -73,8 +73,9 @@ import OrderFilterBox from '../components/OrderFilterBox.vue';
 import OrderPagination from '../components/OrderPagination.vue';
 import { fetchMyWarehouseOrders, exportLabels, type SearchOrderRequest } from '../services/orderService';
 import { type Order } from '../type/order/Order';
+import { MAX_EXPORT } from '../../../constants/SelectionLimit.ts';
+import type { ErrorResponse } from '@/services/error-Response.ts';
 
-const MAX_EXPORT = 10;  // Giới hạn số đơn hàng được chọn để xuất nhãn cùng lúc
 // ===== STATE =====
 // Danh sách đơn hàng từ API
 const orders = ref<Order[]>([]);
@@ -215,9 +216,9 @@ const handleExportLabels = async () => {
             
             alert(`Xuất nhãn thành công cho ${selectedOrders.value.length} đơn hàng`);
             clearSelected();  // Clear lựa chọn sau khi export
-        } catch (error) {
+        } catch (error : ErrorResponse | any) {
             console.error('Export labels failed:', error);
-            alert('Xuất nhãn thất bại. Vui lòng thử lại.');
+            alert(`${error.code}: ${error?.message}`||'Xuất nhãn thất bại. Vui lòng thử lại.');
         }
     }
 };

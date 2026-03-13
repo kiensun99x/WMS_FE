@@ -7,7 +7,7 @@
           <th v-if="showCheckbox" class="px-4 py-3 text-left">
             <input 
               type="checkbox" 
-              :checked="allSelected" 
+              :checked="isAllSelected" 
               @change="toggleSelectAll($event)"
               class="rounded"
             />
@@ -105,6 +105,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { type Order } from '../type/order/Order';
+import { getStatusLabel } from '../../../constants/orderStatus/StatusLabel';
+import { getStatusClass } from '../../../constants/orderStatus/StatusStyle';
 
 // ===== PROPS =====
 // orders: Danh sách đơn hàng cần hiển thị
@@ -138,7 +140,7 @@ const emit = defineEmits<{
 
 // ===== COMPUTED =====
 // Kiểm tra xem tất cả đơn hàng trên trang này có được chọn không?
-const allSelected = computed(() => {
+const isAllSelected = computed(() => {
   if (props.orders.length === 0) return false;
   return props.orders.every(o => props.selectedOrders?.includes(o.id));
 });
@@ -150,7 +152,7 @@ const allSelected = computed(() => {
 const toggleSelectAll = (event: Event) => {
   const currentSelected = [...(props.selectedOrders || [])];
   
-  if (allSelected.value) {
+  if (isAllSelected.value) {
     const orderIds = props.orders.map(o => o.id);
     const newSelected = currentSelected.filter(id => !orderIds.includes(id));
     emit('update:selectedOrders', newSelected);
@@ -204,32 +206,6 @@ const toggleSelect = (id: number, event: Event) => {
   }
 
   emit('update:selectedOrders', newSelected);
-};
-
-// 🏷️ Chuyển đổi status code thành label tiếng Việt (để hiển thị)
-// VD: 'NEW' -> 'Mới', 'DELIVERED' -> 'Đã giao'
-const getStatusLabel = (status: string) => {
-  const labels: Record<string, string> = {
-    NEW: 'Mới',
-    STORED: 'Lưu kho',
-    DELIVERED: 'Đã giao',
-    FAILED: 'Giao thất bại',
-    RETURNED: 'Trả hàng'
-  };
-  return labels[status] || status;
-};
-
-// 🎨 Lấy CSS class cho status badge (để hiển thị màu)
-// VD: 'NEW' -> blue badge, 'DELIVERED' -> green badge
-const getStatusClass = (status: string) => {
-  const classes: Record<string, string> = {
-    NEW: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800',
-    STORED: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800',
-    DELIVERED: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800',
-    FAILED: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800',
-    RETURNED: 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800',
-  };
-  return classes[status] || '';
 };
 
 // 📅 Format lại đường dây ngày/giờ sang định dạng Việt
