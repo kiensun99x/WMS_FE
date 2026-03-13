@@ -188,6 +188,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { createOrder } from '../../order/services/orderService'
+import type { ErrorResponse } from '@/services/error-Response'
 
 const form = ref({
   supplierName: '',
@@ -278,9 +279,9 @@ const handleSubmit = async () => {
     } else {
       alert(data?.message || 'Tạo đơn hàng không thành công. Vui lòng thử lại.')
     }
-  } catch (error: any) {
+  } catch (error: ErrorResponse | any) {
     console.error('Create order failed:', error)
-    const errorMessage = error?.message || 'Lỗi khi tạo đơn hàng. Vui lòng thử lại.'
+    const errorMessage = `${error.code}: ${error?.message}` || 'Lỗi khi tạo đơn hàng. Vui lòng thử lại.'
     alert(errorMessage)
   } finally {
     isLoading.value = false

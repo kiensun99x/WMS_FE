@@ -2,10 +2,6 @@ import { createRouter, createWebHistory } from "vue-router"
 import type { RouteRecordRaw } from "vue-router"
 
 import { orderRoutes } from "../modules/order/routes/orderRoutes"
-import MyWarehousePage from "../modules/order/pages/MyWarehousePage.vue"
-
-import WarehousePage from "../pages/WarehousePage.vue"
-import DispatchPage from "../modules/order/pages/DispatchPage.vue"
 import { reportRoutes } from "../modules/report/routes/reportRoutes"
 import { authRoutes } from "../modules/auth/routes/authRoutes"
 

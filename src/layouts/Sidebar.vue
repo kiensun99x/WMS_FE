@@ -68,7 +68,6 @@ const handleLogout = () => {
 };
 
 const menu = [
-  // { path: '/dashboard', label: 'Dashboard', name: 'Dashboard' },
   { path: '/orders', label: 'Đơn hàng', name: 'Orders' },
   { path: '/orders/create', label: 'Tạo đơn hàng', name: 'CreateOrder' },
   { path: '/my-warehouse', label: 'Kho hàng của tôi', name: 'MyWarehouse' },

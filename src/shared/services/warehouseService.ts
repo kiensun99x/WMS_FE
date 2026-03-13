@@ -13,16 +13,12 @@ export interface WarehouseDetail extends WarehouseBrief {
 }
 
 export const getWarehouses = async (): Promise<WarehouseBrief[]> => {
-  const res = await http.get<unknown>("/warehouses")
+  const res = await http.get<WarehouseBrief[]>("/warehouses")
 
-  const data = (res as any).data
+  const data = res.data
 
-  if (Array.isArray(data)) {
-    return data as WarehouseBrief[]
-  }
-
-  if (data && Array.isArray(data.result)) {
-    return data.result as WarehouseBrief[]
+  if (data && Array.isArray(data)) {
+    return data
   }
 
   console.warn("getWarehouses: unexpected response", data)
@@ -31,5 +27,5 @@ export const getWarehouses = async (): Promise<WarehouseBrief[]> => {
 
 export const getCurrentWarehouse = async (): Promise<ApiResponse<WarehouseDetail> | null> => {
   const res = await http.get<ApiResponse<WarehouseDetail>>("/warehouses/me")
-  return (res as any).data
+  return res.data ?? null
 }

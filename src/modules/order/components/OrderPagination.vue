@@ -2,7 +2,7 @@
   <div class="flex items-center gap-2">
     <!-- Previous Button -->
     <button
-      @click="previousPage"
+      @click="goToPreviousPage"
       :disabled="currentPage === 1"
       class="py-1 px-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
     >
@@ -62,7 +62,7 @@
 
     <!-- Next Button -->
     <button
-      @click="nextPage"
+      @click="goToNextPage"
       :disabled="currentPage === totalPages"
       class="py-1 px-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
     >
@@ -114,7 +114,7 @@ const middlePages = computed(() => {
 // ⬅️ Xử lý nút "Trang trước"
 // - Nếu đang ở trang 1, không làm gì
 // - Không thì phát sự kiện 'change-page' với trang trước
-const previousPage = () => {
+const goToPreviousPage = () => {
   if (props.currentPage > 1) {
     emit('change-page', props.currentPage - 1);
   }
@@ -123,7 +123,7 @@ const previousPage = () => {
 // ➡️ Xử lý nút "Trang sau"
 // - Nếu đang ở trang cuối, không làm gì
 // - Không thì phát sự kiện 'change-page' với trang sau
-const nextPage = () => {
+const goToNextPage = () => {
   if (props.currentPage < props.totalPages) {
     emit('change-page', props.currentPage + 1);
   }
