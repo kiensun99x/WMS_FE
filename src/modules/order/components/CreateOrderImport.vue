@@ -63,12 +63,14 @@
         <button
           type="button"
           class="px-6 py-2 border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition"
+          @click="removeFile"
         >
           Hủy bỏ
         </button>
         <button
           type="button"
           :disabled="!selectedFile"
+          @click="submitImport"
           class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
         >
           Xác nhận nhập dữ liệu
@@ -133,7 +135,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { fetchFileTemplate } from '../services/importOrderService'
+import { fetchFileTemplate, fetchImportOrders } from '../services/importOrderService'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
@@ -162,8 +164,6 @@ const handleDrop = (event: DragEvent) => {
 
   if (!files || files.length === 0) return
 
-  console.log(files[0]);
-  
   processFile(files[0])
 }
 
@@ -204,6 +204,27 @@ const handleFileSelect = (event: Event) => {
   if (!target.files || target.files.length === 0) return
 
   processFile(target.files[0])
+}
+
+const removeFile = () => {
+  selectedFile.value = null
+  importError.value = ''
+}
+
+const submitImport = async () => {
+  if (!selectedFile.value) return
+
+  try {
+    const response = await fetchImportOrders(selectedFile.value)
+
+    const data = response.data
+
+    alert(`Code: ${data.code}\nMessage: ${data.message}`)
+
+  } catch (error) {
+    console.error(error)
+    alert('Import thất bại')
+  }
 }
 
 const downloadErrorFile = () => {

@@ -10,3 +10,15 @@ export const fetchFileTemplate = async () => {
 
   return response.data
 }
+
+export const fetchImportOrders = (file: File) => {
+  const formData = new FormData()
+
+  formData.append('file', file)
+
+  return http.post('/orders/import/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
