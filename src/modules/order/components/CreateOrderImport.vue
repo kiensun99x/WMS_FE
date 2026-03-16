@@ -2,8 +2,19 @@
   <div class="space-y-6 flex gap-4">
     <main class="flex-1 space-y-6">
       <!-- Upload File Section -->
-      <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 bg-gray-50">
-        <div class="text-center">
+      <div 
+        :class="[
+          'border-2 border-dashed rounded-lg p-12 bg-gray-50',
+          isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+        ]"
+        @dragover.prevent="isDragging = true"
+        @dragleave="isDragging = false"
+        @drop.prevent="handleDrop"
+      >
+        <div v-if="selectedFile" class="text-center mt-4 text-sm text-gray-700">
+          Đã chọn file: <span class="font-bold">{{ selectedFile.name }}</span>
+        </div>
+        <div v-else class="text-center">
           <div class="mb-4">
             <span class="text-6xl inline-block">📁</span>
           </div>
@@ -24,7 +35,7 @@
             type="file"
             accept=".xlsx"
             class="hidden"
-            @change=""
+            @change="handleFileSelect"
           />
         </div>
       </div>
@@ -126,6 +137,7 @@ import { fetchFileTemplate } from '../services/importOrderService'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
+const isDragging = ref(false)
 const importError = ref<string>('')
 const errorFile = ref<Blob | null>(null)
 
@@ -144,36 +156,55 @@ const getTemplateFile = async () => {
   }
 }
 
+const handleDrop = (event: DragEvent) => {
+  isDragging.value = false
+  const files = event.dataTransfer?.files
+
+  if (!files || files.length === 0) return
+
+  console.log(files[0]);
+  
+  processFile(files[0])
+}
+
+const processFile = (file: File | undefined) => {
+  if (!file) return
+  // reset error
+  importError.value = ''
+
+  // 1. validate extension
+  if (!file.name.toLowerCase().endsWith('.xlsx')) {
+    importError.value = 'Chỉ hỗ trợ định dạng file .xlsx'
+    selectedFile.value = null
+    return
+  }
+
+  // 2. validate size (10MB)
+  const MAX_SIZE = 10 * 1024 * 1024
+
+  if (file.size > MAX_SIZE) {
+    importError.value = 'Dung lượng file không được vượt quá 10MB'
+    selectedFile.value = null
+    return
+  }
+
+  // 3. lưu file
+  selectedFile.value = file
+
+  console.log('File hợp lệ:', file)
+}
+
 const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
-// const handleFileSelect = (event: Event) => {
-//   const target = event.target as HTMLInputElement
-//   const files = target.files
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
 
-//   if (!files || files.length === 0) return
+  if (!target.files || target.files.length === 0) return
 
-//   const file = files[0]
-
-//   // Validate file type
-//   if (!file.name.endsWith('.xlsx')) {
-//     importError.value = 'Chỉ hỗ trợ định dạng file .xlsx'
-//     selectedFile.value = null
-//     return
-//   }
-
-//   // Validate file size (10MB)
-//   if (file.size > 10 * 1024 * 1024) {
-//     importError.value = 'Dung lượng file không được vượt quá 10MB'
-//     selectedFile.value = null
-//     return
-//   }
-
-//   selectedFile.value = file
-//   importError.value = ''
-//   console.log('Selected file:', file)
-// }
+  processFile(target.files[0])
+}
 
 const downloadErrorFile = () => {
   if (!errorFile.value) return
