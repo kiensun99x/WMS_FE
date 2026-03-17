@@ -152,7 +152,7 @@
               </td>
 
               <td class="p-4 text-gray-600">
-                {{ hist.failureReasonId || '-' }}
+                {{ hist.failureReason || '-' }}
               </td>
 
             </tr>
@@ -330,6 +330,8 @@ const loadDetail = async () => {
     const histResp = await getOrderHistories(orderId)
     const histData = histResp.data.result
     if (histData) {
+      console.log(histData.histories);
+      
       histories.value = histData.histories || []
     }
   } catch (err: any) {
