@@ -26,7 +26,7 @@
           </p>
           <button
             @click="triggerFileInput"
-            class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold rounded-lg transition"
+            class="px-6 py-2 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-900 font-bold rounded-lg transition"
           >
             Chọn file từ máy tính
           </button>
@@ -71,7 +71,7 @@
           type="button"
           :disabled="!selectedFile"
           @click="submitImport"
-          class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+          class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
         >
           Xác nhận nhập dữ liệu
         </button>
@@ -89,11 +89,11 @@
             <h3 class="text-lg font-bold text-gray-900 mb-2">Tải file mẫu chuẩn</h3>
             <p class="text-sm text-gray-600 mb-4">
               Cần sử dụng đúng định dạng dạng tệp. 
-              <a href="#" class="text-blue-600 font-bold">INB_ImportData.xlsx</a>
+              <a href="#" class="text-blue-600 font-bold cursor-default">INB_ImportData.xlsx</a>
             </p>
             <button
               @click="getTemplateFile"
-              class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition flex items-center gap-2"
+              class="px-6 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-lg transition flex items-center gap-2"
             >
               <span>⬇️</span>
               <span>Tải file mẫu (.xlsx)</span>
@@ -229,6 +229,7 @@ const submitImport = async () => {
       alert(`Code: ${data.code}\nMessage: ${data.message} with ${result.totalValidRows} valid rows`)
     } else {
       errorFileId.value = result.errorFileId
+      importError.value = data.message
     }
 
 

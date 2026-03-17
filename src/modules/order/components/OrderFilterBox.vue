@@ -75,14 +75,14 @@
     <div class="flex gap-3">
       <button
         @click="resetFilters"
-        class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
+        class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-lg transition"
       >
         <span>↻</span>
         <span>Đặt lại</span>
       </button>
       <button
         @click="applyFilters"
-        class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+        class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg transition"
       >
         <span>🔍</span>
         <span>Tìm kiếm</span>

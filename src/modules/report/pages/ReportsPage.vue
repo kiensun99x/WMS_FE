@@ -189,7 +189,7 @@
       <div class="flex justify-end mt-8 border-t border-gray-200 pt-6">
         <button
           @click="generateReport"
-          class="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold px-6 py-3 rounded-lg shadow flex items-center gap-2 transition"
+          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow flex items-center gap-2 transition"
         >
           Xuất báo cáo Excel
         </button>

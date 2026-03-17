@@ -29,7 +29,10 @@
       <div class="text-sm font-semibold mb-3">{{ userInfo.fullName }}</div>
       <div class="text-sm mb-3">{{userInfo.warehouseName}}({{ userInfo.warehouseCode }})</div>
       <div class="flex space-x-2">
-        <button class="flex-1 px-3 py-2 text-xs bg-gray-700 hover:bg-gray-600 rounded transition">
+        <button 
+          @click="handleSetting"
+          class="flex-1 px-3 py-2 text-xs bg-gray-700 hover:bg-gray-600 rounded transition"
+        >
           Settings
         </button>
         <button
@@ -65,6 +68,12 @@ const handleLogout = () => {
   authStore.logout();
   localStorage.clear();
   router.push('/login');
+};
+
+const handleSetting = () => {
+  // navigate to settings page (if exists)
+  alert('Chức năng đang phát triển');
+  // router.push('/settings');
 };
 
 const menu = [
