@@ -221,7 +221,10 @@ const loadWarehouses = async () => {
 // - Clear lựa chọn (selectedOrders) - vì dữ liệu thay đổi
 // - Reset về trang 1
 const handleSearch = (searchFilters: SearchOrderRequest) => {
-  filters.value = searchFilters;      // Lưu filters
+  filters.value = {
+    ...searchFilters,
+    statusCode: 0,  // Luôn giữ statusCode = 0 để chỉ tìm kiếm đơn hàng mới
+  }     // Lưu filters
   clearSelected();
   loadOrders(0);                      // Load trang 1 (0-indexed)
 };
