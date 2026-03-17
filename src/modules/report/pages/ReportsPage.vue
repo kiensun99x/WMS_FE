@@ -176,7 +176,7 @@
               v-if="errorMessage"
               class="text-red-500 text-sm flex items-start gap-2 mt-2"
             >
-              <span class="material-icons text-red-500 text-[18px]">error</span>
+              <!-- <span class="material-icons text-red-500 text-[18px]">error</span> -->
               <span>{{ errorMessage }}</span>
             </div>
           </div>

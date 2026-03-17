@@ -51,9 +51,7 @@ axiosInstance.interceptors.request.use(
  */
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
-    // leave the full AxiosResponse in place so callers can access
-    // `response.data` normally.  This avoids type mismatches and makes
-    // the behaviour predictable.
+    
     return response
   },
   (error) => {
@@ -71,7 +69,7 @@ axiosInstance.interceptors.response.use(
       try {
         window.alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
       } catch (e) {
-        /* ignore if alert not available */
+        
       }
       window.location.href = "/login"
     }

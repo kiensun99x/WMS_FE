@@ -11,6 +11,33 @@
     </div>
 
     <div v-else>
+
+      <!-- HEADER -->
+      <div class="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">
+            Thông tin đơn hàng: {{ order?.code }}
+          </h1>
+          <p class="text-gray-500 text-sm mt-1">
+            Ngày tạo: {{ formatDate(order?.createdAt || '') }}
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button
+            @click="handlePrintLabel"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          >
+            In phiếu giao hàng
+          </button>
+          <button 
+            @click="openConfirmDeliveryModal"
+            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          >
+            Xác nhận giao hàng
+          </button>
+        </div>
+      </div>
+
       <!-- 3 CARDS -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
 
@@ -143,6 +170,14 @@
 
     </div>
     </div>
+
+    <!-- Confirm Delivery Modal -->
+    <ConfirmDeliveryModal 
+      :is-open="showConfirmDeliveryModal"
+      :order-id="orderId"
+      @close="closeConfirmDeliveryModal"
+      @success="handleConfirmDeliverySuccess"
+    />
   </div>
 </template>
 
@@ -152,9 +187,11 @@ import { useRoute } from 'vue-router'
 import {
   getOrderById,
   getOrderHistories,
+  exportLabels,
 } from '../services/orderService'
 import { type OrderHistoryItem } from '../type/history/OrderHistoryItem'
 import { type Order } from '../type/order/Order'
+import ConfirmDeliveryModal from '../components/ConfirmDeliveryModal.vue'
 
 // lấy id từ route params (router đã khai báo props:true)
 const route = useRoute()
@@ -166,6 +203,59 @@ const order = ref<Order | null>(null)
 const histories = ref<OrderHistoryItem[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
+const showConfirmDeliveryModal = ref(false)
+
+// Modal handlers
+const openConfirmDeliveryModal = () => {
+  showConfirmDeliveryModal.value = true
+}
+
+const closeConfirmDeliveryModal = () => {
+  showConfirmDeliveryModal.value = false
+}
+
+const handleConfirmDeliverySuccess = () => {
+  // Reload order data after successful confirmation
+  loadDetail()
+}
+
+const handlePrintLabel = async () => {
+  const idToPrint = order.value?.id ?? orderId
+  if (!idToPrint || Number.isNaN(idToPrint)) {
+    alert('Không tìm thấy đơn hàng để in phiếu')
+    return
+  }
+
+  if (!confirm('Bạn có chắc muốn in phiếu giao hàng cho đơn này?')) {
+    return
+  }
+
+  try {
+    const response = await exportLabels([idToPrint])
+    const blob = response.data
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+
+    const contentDisposition = response.headers['content-disposition']
+    let filename = `Label_${order.value?.code || idToPrint}_${new Date().toISOString().split('T')[0]}.xlsx`
+    if (contentDisposition && contentDisposition.includes('filename')) {
+      const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+?)(?:;|$)/)
+      if (filenameMatch) {
+        filename = decodeURIComponent(filenameMatch[1])
+      }
+    }
+
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('Print label failed:', err)
+    alert('In phiếu giao hàng thất bại. Vui lòng thử lại.')
+  }
+}
 
 // helper: định dạng ngày giờ
 const formatDate = (iso: string) => {

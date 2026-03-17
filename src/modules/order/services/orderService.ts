@@ -112,3 +112,26 @@ export const dispatchOrders = (orderIds: number[], warehouseId: number) => {
 export const createOrder = (orderData: CreateOrderRequest) => {
   return http.post<ApiResponse<Order>>('/orders/', orderData)
 }
+
+/**
+ * Get failure reasons for delivery
+ * @returns ApiResponse with list of failure reasons
+ */
+export const getFailureReasons = () => {
+  return http.get<ApiResponse<any>>('/failure-reasons')
+}
+
+export interface ConfirmDeliveryRequest {
+  success: boolean
+  failureReasonId?: number
+}
+
+/**
+ * Confirm delivery for an order
+ * @param orderId - Order ID
+ * @param request - Delivery confirmation data
+ * @returns ApiResponse with confirmation result
+ */
+export const confirmDelivery = (orderId: number, request: ConfirmDeliveryRequest) => {
+  return http.post<ApiResponse<any>>(`/orders/${orderId}/confirm-delivery`, request)
+}
