@@ -3,6 +3,12 @@ import type { ApiResponse } from '@/services/api-response'
 import type { Order } from '../type/order/Order'
 import type { OrderPageResponse } from '../type/order/OrderPageResponse'
 
+export interface ImportOrdersResponse {
+  errorFileId: number
+  totalErrorRows: number
+  totalValidRows: number
+}
+
 export const fetchFileTemplate = async () => {
   const response = await http.get('/orders/import/template', {
     responseType: 'blob'
@@ -21,4 +27,12 @@ export const fetchImportOrders = (file: File) => {
       'Content-Type': 'multipart/form-data'
     }
   })
+}
+
+export const fetchErrorFile = async (id: number) => {
+  const response = await http.get(`/orders/import/error-file/${id}`, {
+    responseType: 'blob'
+  })
+
+  return response.data
 }

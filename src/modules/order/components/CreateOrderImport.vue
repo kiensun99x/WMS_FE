@@ -49,7 +49,7 @@
             {{ importError }}
           </p>
           <button
-            v-if="errorFile"
+            v-if="errorFileId"
             @click="downloadErrorFile"
             class="text-sm text-red-600 hover:text-red-700 font-bold underline"
           >
@@ -135,13 +135,18 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { fetchFileTemplate, fetchImportOrders } from '../services/importOrderService'
+import { 
+  fetchFileTemplate, 
+  fetchImportOrders,
+  fetchErrorFile, 
+  type ImportOrdersResponse } from '../services/importOrderService'
+import type { ErrorResponse } from '@/services/error-Response'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
 const isDragging = ref(false)
 const importError = ref<string>('')
-const errorFile = ref<Blob | null>(null)
+const errorFileId = ref<number | null>(null)
 
 const getTemplateFile = async () => {
   try {
@@ -190,8 +195,6 @@ const processFile = (file: File | undefined) => {
 
   // 3. lưu file
   selectedFile.value = file
-
-  console.log('File hợp lệ:', file)
 }
 
 const triggerFileInput = () => {
@@ -219,21 +222,46 @@ const submitImport = async () => {
 
     const data = response.data
 
-    alert(`Code: ${data.code}\nMessage: ${data.message}`)
+    
+    const result : ImportOrdersResponse = data.result
+    
+    if(result.totalValidRows){
+      alert(`Code: ${data.code}\nMessage: ${data.message} with ${result.totalValidRows} valid rows`)
+    } else {
+      errorFileId.value = result.errorFileId
+    }
 
-  } catch (error) {
+
+
+  } catch (error : ErrorResponse | any) {
     console.error(error)
-    alert('Import thất bại')
+    alert(error?.message)
   }
 }
 
-const downloadErrorFile = () => {
-  if (!errorFile.value) return
-  const url = URL.createObjectURL(errorFile.value)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'INB_ImportError.xlsx'
-  a.click()
-  URL.revokeObjectURL(url)
+const downloadErrorFile = async () => {
+  if (!errorFileId.value) return
+
+  try {
+    const response = await fetchErrorFile(errorFileId.value)
+
+    const blob = new Blob(
+      [response],
+      { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+    )
+
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `INB_Import_Error_${errorFileId.value}.xlsx`
+
+    a.click()
+
+    URL.revokeObjectURL(url)
+
+  } catch (error : ErrorResponse | any) {
+    console.error('Download error file failed:', error.message || error)
+  }
 }
 </script>
