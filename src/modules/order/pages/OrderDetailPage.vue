@@ -22,7 +22,7 @@
             Ngày tạo: {{ formatDate(order?.createdAt || '') }}
           </p>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div v-if="orderWarehouse" class="flex flex-wrap gap-2">
           <button
             @click="handlePrintLabel"
             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
@@ -204,6 +204,7 @@ const histories = ref<OrderHistoryItem[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const showConfirmDeliveryModal = ref(false)
+const orderWarehouse = computed(() => order.value?.warehouseCode == localStorage.getItem('warehouseCode'))
 
 // Modal handlers
 const openConfirmDeliveryModal = () => {
