@@ -102,7 +102,7 @@ const warehouses = ref<any[]>([])
 const message = ref("")
 
 /**
- * LOAD WAREHOUSE LIST
+ * load warehouse list
  */
 const loadWarehouses = async () => {
   try {
@@ -121,11 +121,10 @@ const loadWarehouses = async () => {
 onMounted(loadWarehouses)
 
 /**
- * LOGIN
+ * handle login form submission
  */
 const handleLogin = async () => {
-  // keep previous message visible until user refreshes
-
+  
   if (!username.value || !password.value || !warehouseId.value) {
     message.value = "Vui lòng nhập đầy đủ thông tin"
     return
@@ -143,7 +142,6 @@ const handleLogin = async () => {
 
     router.push("/orders")
   } catch (err: any) {
-    // backend may return { message } in error response
     message.value = err?.message || err?.response?.message || "Đăng nhập thất bại"
   }
 }

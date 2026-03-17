@@ -1,6 +1,3 @@
-/**
- * Standard error response format from API
- */
 export interface ErrorResponse {
   code: string
   error: string
@@ -10,7 +7,6 @@ export interface ErrorResponse {
 }
 
 /**
- * Parse error response from API
  * @param error - Error object from axios
  * @returns ErrorResponse or default error message
  */
@@ -58,7 +54,6 @@ export const getErrorMessage = (error: any): string => {
 }
 
 /**
- * Get full error response object
  * @param error - Error object from axios
  * @returns Full ErrorResponse object or constructed error
  */
