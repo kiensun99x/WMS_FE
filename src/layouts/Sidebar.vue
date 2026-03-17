@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { authStore } from '../modules/auth/store/authStore';
+import { authStore } from '../stores/authStore';
 
 const route = useRoute();
 const router = useRouter();

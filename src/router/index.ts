@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router"
 import type { RouteRecordRaw } from "vue-router"
 
-import { orderRoutes } from "../modules/order/routes/orderRoutes"
-import { reportRoutes } from "../modules/report/routes/reportRoutes"
-import { authRoutes } from "../modules/auth/routes/authRoutes"
+import { orderRoutes } from "./order/orderRoutes"
+import { reportRoutes } from "./report/reportRoutes"
+import { authRoutes } from "./auth/authRoutes"
 
 import NotFoundPage from "../pages/NotFoundPage.vue"
 
